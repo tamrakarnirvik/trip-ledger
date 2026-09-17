@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Trip {
+  id                    String @id @default(cuid())
+  name                  String
+  contributionPerPerson Int
+
+  members  Member[]
+  expenses Expense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Member {
+  id   String @id @default(cuid())
+  name String
+
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  contributions Contribution[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contribution {
+  id     String @id @default(cuid())
+  amount Int
+
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Expense {
+  id       String          @id @default(cuid())
+  title    String
+  category ExpenseCategory
+  amount   Int
+  date     DateTime
+
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ExpenseCategory {
+  ACCOMMODATION
+  FOOD
+  DRINKS
+  TRANSPORT
+  ENTERTAINMENT
+  OTHER
+}
