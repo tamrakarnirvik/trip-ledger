@@ -297,8 +297,9 @@ const userInitial =
   <main className="min-h-screen bg-[#f7f7f8] pb-36 text-zinc-950 md:pb-0">
 
     <AppSidebar
-      tripName={trip.name}
-    />
+  tripName={trip.name}
+  canManage={isTreasurer}
+/>
 
     <div
   className="
@@ -321,6 +322,7 @@ const userInitial =
         {/* HEADER */}
 
         <motion.header
+        id="dashboard"
   initial={{
     opacity: 0,
     y: -10,
@@ -516,79 +518,105 @@ const userInitial =
 
         {/* SUMMARY CARDS */}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+<section
+  className="
+    grid
+    grid-cols-2
+    gap-3
 
-          <StatCard
-            title="Expected Fund"
-            value={
-              formatMoney(
-                expectedFund
-              )
-            }
-            description={`${formatMoney(
-              trip.contributionPerPerson
-            )} × ${members.length} people`}
-            icon={
-              <Banknote
-                size={19}
-              />
-            }
-            delay={0.08}
-          />
+    sm:gap-4
 
+    xl:grid-cols-4
+  "
+>
 
-          <StatCard
-            title="Collected"
-            value={
-              formatMoney(
-                collectedMoney
-              )
-            }
-            description={`${fullyPaidMembers} of ${members.length} fully paid`}
-            icon={
-              <UsersRound
-                size={19}
-              />
-            }
-            delay={0.14}
-          />
+  {/* EXPECTED FUND */}
+
+  <StatCard
+    title="Expected Fund"
+    value={
+      formatMoney(
+        expectedFund
+      )
+    }
+    description={`${formatMoney(
+      trip.contributionPerPerson
+    )} × ${members.length} people`}
+    icon={
+      <Banknote
+        size={18}
+        strokeWidth={1.8}
+      />
+    }
+    tone="violet"
+    delay={0.08}
+  />
 
 
-          <StatCard
-            title="Total Spent"
-            value={
-              formatMoney(
-                totalExpenses
-              )
-            }
-            description={`${expenses.length} expenses recorded`}
-            icon={
-              <ReceiptText
-                size={19}
-              />
-            }
-            delay={0.2}
-          />
+  {/* COLLECTED */}
+
+  <StatCard
+    title="Collected"
+    value={
+      formatMoney(
+        collectedMoney
+      )
+    }
+    description={`${fullyPaidMembers} of ${members.length} fully paid`}
+    icon={
+      <UsersRound
+        size={18}
+        strokeWidth={1.8}
+      />
+    }
+    tone="emerald"
+    delay={0.14}
+  />
 
 
-          <StatCard
-            title="Available"
-            value={
-              formatMoney(
-                availableMoney
-              )
-            }
-            description="Current trip money"
-            icon={
-              <Wallet
-                size={19}
-              />
-            }
-            highlight
-            delay={0.26}
-          />
+  {/* TOTAL SPENT */}
 
-        </section>
+  <StatCard
+    title="Total Spent"
+    value={
+      formatMoney(
+        totalExpenses
+      )
+    }
+    description={`${expenses.length} expenses recorded`}
+    icon={
+      <ReceiptText
+        size={18}
+        strokeWidth={1.8}
+      />
+    }
+    tone="rose"
+    delay={0.2}
+  />
+
+
+  {/* AVAILABLE */}
+
+  <StatCard
+    title="Available"
+    value={
+      formatMoney(
+        availableMoney
+      )
+    }
+    description="Current trip money"
+    icon={
+      <Wallet
+        size={18}
+        strokeWidth={1.8}
+      />
+    }
+    tone="blue"
+    highlight
+    delay={0.26}
+  />
+
+</section>
 
 
         {/* =================================

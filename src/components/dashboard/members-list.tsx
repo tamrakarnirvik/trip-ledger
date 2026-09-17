@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useState,
 } from "react";
 
@@ -9,7 +10,10 @@ import {
 } from "next/navigation";
 
 import {
+  Eye,
+  History,
   MoreHorizontal,
+  Pencil,
   RotateCcw,
   Trash2,
   UsersRound,
@@ -40,6 +44,22 @@ type MembersListProps = {
 };
 
 
+type MemberModalView =
+  | "overview"
+  | "history"
+  | "edit";
+
+
+const avatarStyles = [
+  "bg-violet-50 text-violet-700",
+  "bg-sky-50 text-sky-700",
+  "bg-emerald-50 text-emerald-700",
+  "bg-amber-50 text-amber-700",
+  "bg-rose-50 text-rose-700",
+  "bg-indigo-50 text-indigo-700",
+];
+
+
 export function MembersList({
   members,
   contributionPerPerson,
@@ -52,6 +72,24 @@ export function MembersList({
   const [
     selectedMemberId,
     setSelectedMemberId,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+
+  const [
+    modalView,
+    setModalView,
+  ] =
+    useState<MemberModalView>(
+      "overview"
+    );
+
+
+  const [
+    openMenuId,
+    setOpenMenuId,
   ] =
     useState<string | null>(
       null
@@ -78,6 +116,121 @@ export function MembersList({
         member.id ===
         selectedMemberId
     ) ?? null;
+
+
+  /*
+   * Close the small action menu when
+   * clicking somewhere else.
+   */
+  useEffect(() => {
+    if (!openMenuId) {
+      return;
+    }
+
+
+    function handlePointerDown(
+      event: PointerEvent
+    ) {
+      const target =
+        event.target as HTMLElement;
+
+
+      const menu =
+        target.closest(
+          "[data-member-menu]"
+        );
+
+
+      const clickedMenuId =
+        menu?.getAttribute(
+          "data-member-menu"
+        );
+
+
+      if (
+        clickedMenuId !==
+        openMenuId
+      ) {
+        setOpenMenuId(
+          null
+        );
+      }
+    }
+
+
+    function handleKeyDown(
+      event: KeyboardEvent
+    ) {
+      if (
+        event.key === "Escape"
+      ) {
+        setOpenMenuId(
+          null
+        );
+      }
+    }
+
+
+    document.addEventListener(
+      "pointerdown",
+      handlePointerDown
+    );
+
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+
+    return () => {
+      document.removeEventListener(
+        "pointerdown",
+        handlePointerDown
+      );
+
+
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [
+    openMenuId,
+  ]);
+
+
+  function openMember(
+    memberId: string,
+    view: MemberModalView =
+      "overview"
+  ) {
+    setError("");
+
+    setOpenMenuId(
+      null
+    );
+
+    setModalView(
+      view
+    );
+
+    setSelectedMemberId(
+      memberId
+    );
+  }
+
+
+  function toggleMemberMenu(
+    memberId: string
+  ) {
+    setOpenMenuId(
+      (current) =>
+        current === memberId
+          ? null
+          : memberId
+    );
+  }
 
 
   async function handleEdit(
@@ -143,6 +296,10 @@ export function MembersList({
 
 
       router.refresh();
+
+      setModalView(
+        "overview"
+      );
     } catch (error) {
       setError(
         error instanceof Error
@@ -274,35 +431,24 @@ export function MembersList({
   }
 
 
-  function openMember(
-    memberId: string
-  ) {
-    setError("");
-
-    setSelectedMemberId(
-      memberId
-    );
-  }
-
-
   return (
     <>
 
       {/* =================================
-          MEMBERS SECTION
+          MEMBERS
       ================================= */}
 
       <motion.section
         initial={{
           opacity: 0,
-          y: 16,
+          y: 14,
         }}
         animate={{
           opacity: 1,
           y: 0,
         }}
         transition={{
-          duration: 0.45,
+          duration: 0.42,
           delay: 0.34,
           ease: [
             0.22,
@@ -312,7 +458,7 @@ export function MembersList({
           ],
         }}
         className="
-          overflow-hidden
+          relative
           rounded-[24px]
           border
           border-zinc-200
@@ -323,25 +469,21 @@ export function MembersList({
 
         {/* HEADER */}
 
-        <div className="flex items-center justify-between gap-4 px-5 py-5 sm:px-6">
+        <div className="flex items-center justify-between gap-4 px-5 py-4.5 sm:px-6">
 
           <div className="flex min-w-0 items-center gap-3">
 
-            {/* ICON */}
-
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-700">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
               <UsersRound
-                size={18}
+                size={17}
                 strokeWidth={1.8}
               />
             </div>
 
 
-            {/* TITLE */}
-
             <div className="min-w-0">
 
-              <h2 className="text-base font-semibold text-zinc-950">
+              <h2 className="text-base font-semibold tracking-tight text-zinc-950">
                 Members
               </h2>
 
@@ -353,8 +495,6 @@ export function MembersList({
 
           </div>
 
-
-          {/* MEMBER COUNT */}
 
           <span className="shrink-0 rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-600">
             {members.length} members
@@ -369,37 +509,40 @@ export function MembersList({
 
         <div className="hidden px-5 pb-5 md:block sm:px-6">
 
-          <div className="overflow-hidden rounded-xl border border-zinc-100">
+          <div className="rounded-xl border border-zinc-100">
 
             <table className="w-full table-fixed border-collapse">
 
-              {/* TABLE HEADER */}
+              <thead>
 
-              <thead className="bg-zinc-50">
+                <tr className="bg-zinc-50/80">
 
-                <tr className="text-left">
-
-                  <th className="w-[6%] px-3 py-3 text-xs font-medium text-zinc-500">
+                  <th className="w-[6%] px-3 py-2.5 text-left text-[11px] font-medium text-zinc-500">
                     #
                   </th>
 
-                  <th className="w-[24%] px-3 py-3 text-xs font-medium text-zinc-500">
+
+                  <th className="w-[25%] px-3 py-2.5 text-left text-[11px] font-medium text-zinc-500">
                     Member
                   </th>
 
-                  <th className="w-[25%] px-3 py-3 text-xs font-medium text-zinc-500">
+
+                  <th className="w-[24%] px-3 py-2.5 text-right text-[11px] font-medium text-zinc-500">
                     Contribution
                   </th>
 
-                  <th className="w-[16%] px-3 py-3 text-xs font-medium text-zinc-500">
+
+                  <th className="w-[15%] px-3 py-2.5 text-center text-[11px] font-medium text-zinc-500">
                     Status
                   </th>
 
-                  <th className="w-[19%] px-3 py-3 text-xs font-medium text-zinc-500">
+
+                  <th className="w-[20%] px-3 py-2.5 text-right text-[11px] font-medium text-zinc-500">
                     Remaining
                   </th>
 
-                  <th className="w-[10%] px-3 py-3 text-right text-xs font-medium text-zinc-500">
+
+                  <th className="w-[10%] px-3 py-2.5 text-right text-[11px] font-medium text-zinc-500">
                     Actions
                   </th>
 
@@ -408,193 +551,385 @@ export function MembersList({
               </thead>
 
 
-              {/* TABLE BODY */}
-
               <tbody className="divide-y divide-zinc-100">
 
-                {members.map(
-                  (
-                    member,
-                    index
-                  ) => {
-                    const remaining =
-                      Math.max(
-                        contributionPerPerson -
-                          member.amountPaid,
-                        0
-                      );
+                {members.length ===
+                0 ? (
+
+                  <tr>
+
+                    <td
+                      colSpan={6}
+                      className="px-4 py-10 text-center"
+                    >
+
+                      <UsersRound
+                        size={24}
+                        className="mx-auto text-zinc-300"
+                      />
+
+                      <p className="mt-3 text-sm font-medium text-zinc-600">
+                        No members yet
+                      </p>
+
+                      <p className="mt-1 text-xs text-zinc-400">
+                        Add your first trip member to get started.
+                      </p>
+
+                    </td>
+
+                  </tr>
+
+                ) : (
+
+                  members.map(
+                    (
+                      member,
+                      index
+                    ) => {
+
+                      const remaining =
+                        Math.max(
+                          contributionPerPerson -
+                            member.amountPaid,
+                          0
+                        );
 
 
-                    const isPaid =
-                      member.amountPaid >=
-                      contributionPerPerson;
+                      const isPaid =
+                        member.amountPaid >=
+                        contributionPerPerson;
 
 
-                    const isPartial =
-                      member.amountPaid >
-                        0 &&
-                      !isPaid;
+                      const isPartial =
+                        member.amountPaid >
+                          0 &&
+                        !isPaid;
 
 
-                    const status =
-                      isPaid
-                        ? "Paid"
-                        : isPartial
-                          ? "Partial"
-                          : "Pending";
+                      const status =
+                        isPaid
+                          ? "Paid"
+                          : isPartial
+                            ? "Partial"
+                            : "Pending";
 
 
-                    const statusClasses =
-                      isPaid
-                        ? "bg-emerald-50 text-emerald-700"
-                        : isPartial
-                          ? "bg-amber-50 text-amber-700"
-                          : "bg-zinc-100 text-zinc-600";
+                      const statusClasses =
+                        isPaid
+                          ? "bg-emerald-50 text-emerald-700"
+                          : isPartial
+                            ? "bg-amber-50 text-amber-700"
+                            : "bg-zinc-100 text-zinc-600";
 
 
-                    return (
-                      <tr
-                        key={
-                          member.id
-                        }
-                        className="transition hover:bg-zinc-50/70"
-                      >
-
-                        {/* NUMBER */}
-
-                        <td className="px-3 py-3 text-sm text-zinc-500">
-                          {index + 1}
-                        </td>
+                      const avatarClass =
+                        avatarStyles[
+                          index %
+                            avatarStyles.length
+                        ];
 
 
-                        {/* MEMBER */}
+                      return (
+                        <tr
+                          key={
+                            member.id
+                          }
+                          className="
+                            group
+                            transition-colors
+                            duration-150
+                            hover:bg-zinc-50/60
+                          "
+                        >
 
-                        <td className="px-3 py-3">
+                          {/* NUMBER */}
 
-                          <div className="flex min-w-0 items-center gap-3">
+                          <td className="px-3 py-2.5 text-sm tabular-nums text-zinc-400">
+                            {index +
+                              1}
+                          </td>
 
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-50 text-xs font-semibold text-violet-700">
-                              {member.name
-                                .charAt(0)
-                                .toUpperCase()}
+
+                          {/* MEMBER */}
+
+                          <td className="px-3 py-2.5">
+
+                            <div className="flex min-w-0 items-center gap-2.5">
+
+                              <div
+                                className={`
+                                  flex
+                                  h-8
+                                  w-8
+                                  shrink-0
+                                  items-center
+                                  justify-center
+                                  rounded-full
+                                  text-xs
+                                  font-semibold
+                                  ${avatarClass}
+                                `}
+                              >
+                                {member.name
+                                  .charAt(
+                                    0
+                                  )
+                                  .toUpperCase()}
+                              </div>
+
+
+                              <p className="truncate text-sm font-medium text-zinc-800">
+                                {
+                                  member.name
+                                }
+                              </p>
+
                             </div>
 
-
-                            <p className="truncate text-sm font-medium text-zinc-800">
-                              {
-                                member.name
-                              }
-                            </p>
-
-                          </div>
-
-                        </td>
+                          </td>
 
 
-                        {/* CONTRIBUTION */}
+                          {/* CONTRIBUTION */}
 
-                        <td className="px-3 py-3">
+                          <td className="px-3 py-2.5 text-right">
 
-                          <p className="whitespace-nowrap text-sm text-zinc-500">
+                            <span className="whitespace-nowrap text-sm font-medium tabular-nums text-zinc-600">
 
-                            {formatMoney(
-                              member.amountPaid
-                            )}
+                              {formatMoney(
+                                member.amountPaid
+                              )}
 
-                            {" / "}
+                              <span className="mx-1 text-zinc-300">
+                                /
+                              </span>
 
-                            {formatMoney(
-                              contributionPerPerson
-                            )}
+                              {formatMoney(
+                                contributionPerPerson
+                              )}
 
-                          </p>
-
-                        </td>
-
-
-                        {/* STATUS */}
-
-                        <td className="px-3 py-3">
-
-                          <span
-                            className={`
-                              inline-flex
-                              rounded-full
-                              px-3
-                              py-1
-                              text-xs
-                              font-medium
-                              ${statusClasses}
-                            `}
-                          >
-                            {status}
-                          </span>
-
-                        </td>
-
-
-                        {/* REMAINING */}
-
-                        <td className="px-3 py-3">
-
-                          <p
-                            className={`whitespace-nowrap text-sm ${
-                              isPaid
-                                ? "text-emerald-700"
-                                : "text-zinc-500"
-                            }`}
-                          >
-                            {isPaid
-                              ? "Completed"
-                              : formatMoney(
-                                  remaining
-                                )}
-                          </p>
-
-                        </td>
-
-
-                        {/* ACTION */}
-
-                        <td className="px-3 py-3 text-right">
-
-                          {canManage ? (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                openMember(
-                                  member.id
-                                )
-                              }
-                              className="
-                                inline-flex
-                                h-8
-                                w-8
-                                items-center
-                                justify-center
-                                rounded-lg
-                                text-zinc-400
-                                transition
-                                hover:bg-zinc-100
-                                hover:text-zinc-950
-                              "
-                              aria-label={`Manage ${member.name}`}
-                            >
-                              <MoreHorizontal
-                                size={17}
-                              />
-                            </button>
-                          ) : (
-                            <span className="text-sm text-zinc-300">
-                              —
                             </span>
-                          )}
 
-                        </td>
+                          </td>
 
-                      </tr>
-                    );
-                  }
+
+                          {/* STATUS */}
+
+                          <td className="px-3 py-2.5 text-center">
+
+                            <span
+                              className={`
+                                inline-flex
+                                rounded-full
+                                px-2.5
+                                py-1
+                                text-[11px]
+                                font-medium
+                                ${statusClasses}
+                              `}
+                            >
+                              {status}
+                            </span>
+
+                          </td>
+
+
+                          {/* REMAINING */}
+
+                          <td className="px-3 py-2.5 text-right">
+
+                            <span
+                              className={`
+                                whitespace-nowrap
+                                text-sm
+                                font-medium
+                                tabular-nums
+
+                                ${
+                                  isPaid
+                                    ? "text-emerald-700"
+                                    : "text-zinc-600"
+                                }
+                              `}
+                            >
+                              {isPaid
+                                ? "Completed"
+                                : formatMoney(
+                                    remaining
+                                  )}
+                            </span>
+
+                          </td>
+
+
+                          {/* ACTION */}
+
+                          <td className="relative px-3 py-2.5 text-right">
+
+                            {canManage ? (
+
+                              <div
+                                className="relative inline-block"
+                                data-member-menu={
+                                  member.id
+                                }
+                              >
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    toggleMemberMenu(
+                                      member.id
+                                    )
+                                  }
+                                  className={`
+                                    inline-flex
+                                    h-8
+                                    w-8
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    transition
+
+                                    ${
+                                      openMenuId ===
+                                      member.id
+                                        ? "bg-zinc-100 text-zinc-900"
+                                        : "text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900"
+                                    }
+                                  `}
+                                  aria-label={`Actions for ${member.name}`}
+                                  aria-haspopup="menu"
+                                  aria-expanded={
+                                    openMenuId ===
+                                    member.id
+                                  }
+                                >
+                                  <MoreHorizontal
+                                    size={17}
+                                  />
+                                </button>
+
+
+                                {/* DROPDOWN */}
+
+                                {openMenuId ===
+                                  member.id && (
+
+                                  <motion.div
+                                    initial={{
+                                      opacity: 0,
+                                      scale:
+                                        0.96,
+                                      y: -4,
+                                    }}
+                                    animate={{
+                                      opacity: 1,
+                                      scale:
+                                        1,
+                                      y: 0,
+                                    }}
+                                    transition={{
+                                      duration:
+                                        0.14,
+                                    }}
+                                    className="
+                                      absolute
+                                      right-0
+                                      top-9
+                                      z-50
+                                      w-44
+                                      overflow-hidden
+                                      rounded-xl
+                                      border
+                                      border-zinc-200
+                                      bg-white
+                                      p-1.5
+                                      text-left
+                                      shadow-[0_14px_40px_rgba(0,0,0,0.12)]
+                                    "
+                                    role="menu"
+                                  >
+
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        openMember(
+                                          member.id,
+                                          "overview"
+                                        )
+                                      }
+                                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+                                    >
+                                      <Eye
+                                        size={
+                                          14
+                                        }
+                                      />
+
+                                      View details
+                                    </button>
+
+
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        openMember(
+                                          member.id,
+                                          "history"
+                                        )
+                                      }
+                                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+                                    >
+                                      <History
+                                        size={
+                                          14
+                                        }
+                                      />
+
+                                      Payment history
+                                    </button>
+
+
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        openMember(
+                                          member.id,
+                                          "edit"
+                                        )
+                                      }
+                                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+                                    >
+                                      <Pencil
+                                        size={
+                                          14
+                                        }
+                                      />
+
+                                      Edit member
+                                    </button>
+
+                                  </motion.div>
+                                )}
+
+                              </div>
+
+                            ) : (
+
+                              <span className="text-sm text-zinc-300">
+                                —
+                              </span>
+
+                            )}
+
+                          </td>
+
+                        </tr>
+                      );
+                    }
+                  )
+
                 )}
 
               </tbody>
@@ -607,168 +942,335 @@ export function MembersList({
 
 
         {/* =================================
-            MOBILE MEMBER LIST
+            MOBILE
         ================================= */}
 
         <div className="divide-y divide-zinc-100 md:hidden">
 
-          {members.map(
-            (
-              member,
-              index
-            ) => {
-              const remaining =
-                Math.max(
-                  contributionPerPerson -
-                    member.amountPaid,
-                  0
-                );
+          {members.length ===
+          0 ? (
+
+            <div className="px-5 py-10 text-center">
+
+              <UsersRound
+                size={24}
+                className="mx-auto text-zinc-300"
+              />
+
+              <p className="mt-3 text-sm font-medium text-zinc-600">
+                No members yet
+              </p>
+
+              <p className="mt-1 text-xs text-zinc-400">
+                Add your first trip member.
+              </p>
+
+            </div>
+
+          ) : (
+
+            members.map(
+              (
+                member,
+                index
+              ) => {
+
+                const remaining =
+                  Math.max(
+                    contributionPerPerson -
+                      member.amountPaid,
+                    0
+                  );
 
 
-              const isPaid =
-                member.amountPaid >=
-                contributionPerPerson;
+                const isPaid =
+                  member.amountPaid >=
+                  contributionPerPerson;
 
 
-              const isPartial =
-                member.amountPaid >
-                  0 &&
-                !isPaid;
+                const isPartial =
+                  member.amountPaid >
+                    0 &&
+                  !isPaid;
 
 
-              const status =
-                isPaid
-                  ? "Paid"
-                  : isPartial
-                    ? "Partial"
-                    : "Pending";
+                const status =
+                  isPaid
+                    ? "Paid"
+                    : isPartial
+                      ? "Partial"
+                      : "Pending";
 
 
-              const statusClasses =
-                isPaid
-                  ? "bg-emerald-50 text-emerald-700"
-                  : isPartial
-                    ? "bg-amber-50 text-amber-700"
-                    : "bg-zinc-100 text-zinc-600";
+                const statusClasses =
+                  isPaid
+                    ? "bg-emerald-50 text-emerald-700"
+                    : isPartial
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-zinc-100 text-zinc-600";
 
 
-              return (
-                <motion.div
-                  key={
-                    member.id
-                  }
-                  initial={{
-                    opacity: 0,
-                    x: -8,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    x: 0,
-                  }}
-                  transition={{
-                    duration: 0.3,
-                    delay:
-                      0.38 +
-                      index *
-                        0.035,
-                  }}
-                  className="px-5 py-4"
-                >
-
-                  {/* TOP ROW */}
-
-                  <div className="flex items-center gap-3">
-
-                    {/* AVATAR */}
-
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-semibold text-violet-700">
-                      {member.name
-                        .charAt(0)
-                        .toUpperCase()}
-                    </div>
+                const avatarClass =
+                  avatarStyles[
+                    index %
+                      avatarStyles.length
+                  ];
 
 
-                    {/* NAME */}
+                return (
+                  <div
+                    key={
+                      member.id
+                    }
+                    className="relative px-5 py-3.5 transition-colors hover:bg-zinc-50/60"
+                  >
 
-                    <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-3">
 
-                      <p className="truncate text-sm font-medium text-zinc-900">
-                        {
-                          member.name
-                        }
-                      </p>
+                      {/* AVATAR */}
 
-                      <p className="mt-1 text-xs text-zinc-500">
-                        {formatMoney(
-                          member.amountPaid
-                        )}
-                        {" / "}
-                        {formatMoney(
-                          contributionPerPerson
-                        )}
-                      </p>
-
-                    </div>
-
-
-                    {/* STATUS */}
-
-                    <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${statusClasses}`}
-                    >
-                      {status}
-                    </span>
-
-
-                    {/* ACTION */}
-
-                    {canManage && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          openMember(
-                            member.id
-                          )
-                        }
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-950"
-                        aria-label={`Manage ${member.name}`}
+                      <div
+                        className={`
+                          flex
+                          h-9
+                          w-9
+                          shrink-0
+                          items-center
+                          justify-center
+                          rounded-full
+                          text-xs
+                          font-semibold
+                          ${avatarClass}
+                        `}
                       >
-                        <MoreHorizontal
-                          size={17}
-                        />
-                      </button>
-                    )}
-
-                  </div>
+                        {member.name
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
 
 
-                  {/* REMAINING */}
+                      {/* MEMBER INFO */}
 
-                  <div className="mt-3 flex items-center justify-between pl-[52px]">
+                      <div className="min-w-0 flex-1">
 
-                    <span className="text-[11px] text-zinc-400">
-                      Remaining
-                    </span>
+                        <div className="flex items-center gap-2">
 
-                    <span
-                      className={`text-xs font-medium ${
-                        isPaid
-                          ? "text-emerald-700"
-                          : "text-zinc-600"
-                      }`}
-                    >
-                      {isPaid
-                        ? "Completed"
-                        : formatMoney(
-                            remaining
+                          <p className="truncate text-sm font-medium text-zinc-900">
+                            {
+                              member.name
+                            }
+                          </p>
+
+
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${statusClasses}`}
+                          >
+                            {status}
+                          </span>
+
+                        </div>
+
+
+                        <p className="mt-1 whitespace-nowrap text-xs font-medium tabular-nums text-zinc-500">
+
+                          {formatMoney(
+                            member.amountPaid
                           )}
-                    </span>
+
+                          <span className="mx-1 text-zinc-300">
+                            /
+                          </span>
+
+                          {formatMoney(
+                            contributionPerPerson
+                          )}
+
+                        </p>
+
+                      </div>
+
+
+                      {/* MOBILE ACTION MENU */}
+
+                      {canManage && (
+
+                        <div
+                          className="relative"
+                          data-member-menu={
+                            member.id
+                          }
+                        >
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              toggleMemberMenu(
+                                member.id
+                              )
+                            }
+                            className={`
+                              flex
+                              h-8
+                              w-8
+                              shrink-0
+                              items-center
+                              justify-center
+                              rounded-lg
+                              transition
+
+                              ${
+                                openMenuId ===
+                                member.id
+                                  ? "bg-zinc-100 text-zinc-900"
+                                  : "text-zinc-400"
+                              }
+                            `}
+                            aria-label={`Actions for ${member.name}`}
+                          >
+                            <MoreHorizontal
+                              size={17}
+                            />
+                          </button>
+
+
+                          {openMenuId ===
+                            member.id && (
+
+                            <motion.div
+                              initial={{
+                                opacity:
+                                  0,
+                                scale:
+                                  0.96,
+                                y: -4,
+                              }}
+                              animate={{
+                                opacity:
+                                  1,
+                                scale:
+                                  1,
+                                y: 0,
+                              }}
+                              className="
+                                absolute
+                                right-0
+                                top-9
+                                z-50
+                                w-44
+                                rounded-xl
+                                border
+                                border-zinc-200
+                                bg-white
+                                p-1.5
+                                shadow-xl
+                              "
+                            >
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  openMember(
+                                    member.id,
+                                    "overview"
+                                  )
+                                }
+                                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                              >
+                                <Eye
+                                  size={
+                                    14
+                                  }
+                                />
+
+                                View details
+                              </button>
+
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  openMember(
+                                    member.id,
+                                    "history"
+                                  )
+                                }
+                                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                              >
+                                <History
+                                  size={
+                                    14
+                                  }
+                                />
+
+                                Payment history
+                              </button>
+
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  openMember(
+                                    member.id,
+                                    "edit"
+                                  )
+                                }
+                                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                              >
+                                <Pencil
+                                  size={
+                                    14
+                                  }
+                                />
+
+                                Edit member
+                              </button>
+
+                            </motion.div>
+                          )}
+
+                        </div>
+
+                      )}
+
+                    </div>
+
+
+                    {/* REMAINING */}
+
+                    <div className="mt-2.5 flex items-center justify-between pl-12">
+
+                      <span className="text-[11px] text-zinc-400">
+                        Remaining
+                      </span>
+
+
+                      <span
+                        className={`
+                          text-xs
+                          font-medium
+                          tabular-nums
+
+                          ${
+                            isPaid
+                              ? "text-emerald-700"
+                              : "text-zinc-600"
+                          }
+                        `}
+                      >
+                        {isPaid
+                          ? "Completed"
+                          : formatMoney(
+                              remaining
+                            )}
+                      </span>
+
+                    </div>
 
                   </div>
+                );
+              }
+            )
 
-                </motion.div>
-              );
-            }
           )}
 
         </div>
@@ -777,7 +1279,7 @@ export function MembersList({
 
 
       {/* =================================
-          MEMBER MANAGEMENT MODAL
+          MEMBER MODAL
       ================================= */}
 
       <Modal
@@ -790,248 +1292,489 @@ export function MembersList({
             setSelectedMemberId(
               null
             );
+
+            setModalView(
+              "overview"
+            );
           }
         }}
         title={
           selectedMember?.name ??
           "Member"
         }
-        description="Contribution details and payment history."
+        description="Member contribution and payment information."
       >
 
         {selectedMember && (
           <>
 
-            {/* CONTRIBUTION STATUS */}
+            {/* MODAL NAVIGATION */}
 
-            <div className="rounded-2xl bg-zinc-50 p-4">
-
-              <p className="text-xs font-medium text-zinc-500">
-                Total paid
-              </p>
-
-
-              <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-950">
-
-                {formatMoney(
-                  selectedMember.amountPaid
-                )}
-
-                <span className="text-sm font-normal text-zinc-400">
-                  {" "}
-                  /{" "}
-                  {formatMoney(
-                    contributionPerPerson
-                  )}
-                </span>
-
-              </p>
-
-
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-zinc-200">
-
-                <div
-                  className="h-full rounded-full bg-zinc-900 transition-all duration-500"
-                  style={{
-                    width: `${Math.min(
-                      (
-                        selectedMember.amountPaid /
-                        contributionPerPerson
-                      ) *
-                        100,
-                      100
-                    )}%`,
-                  }}
-                />
-
-              </div>
-
-
-              <p className="mt-3 text-xs text-zinc-500">
-
-                {selectedMember.amountPaid >=
-                contributionPerPerson
-                  ? "Contribution completed."
-                  : `${formatMoney(
-                      contributionPerPerson -
-                        selectedMember.amountPaid
-                    )} remaining`}
-
-              </p>
-
-            </div>
-
-
-            {/* PAYMENT HISTORY */}
-
-            <div className="mt-6">
-
-              <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                Payment History
-              </h3>
-
-
-              {selectedMember
-                .contributions
-                .length === 0 ? (
-
-                <div className="mt-3 rounded-2xl border border-dashed border-zinc-200 p-5 text-center text-sm text-zinc-500">
-                  No payments recorded yet.
-                </div>
-
-              ) : (
-
-                <div className="mt-3 divide-y divide-zinc-100 rounded-2xl border border-zinc-200">
-
-                  {selectedMember
-                    .contributions
-                    .map(
-                      (
-                        contribution
-                      ) => (
-
-                        <div
-                          key={
-                            contribution.id
-                          }
-                          className="flex items-center gap-3 p-3.5"
-                        >
-
-                          <div className="min-w-0 flex-1">
-
-                            <p className="text-sm font-semibold text-zinc-950">
-                              {formatMoney(
-                                contribution.amount
-                              )}
-                            </p>
-
-                            <p className="mt-1 text-xs text-zinc-500">
-                              {formatDateTime(
-                                contribution.createdAt
-                              )}
-                            </p>
-
-                          </div>
-
-
-                          <button
-                            type="button"
-                            disabled={
-                              loading
-                            }
-                            onClick={() =>
-                              handleDeletePayment(
-                                contribution.id,
-                                contribution.amount
-                              )
-                            }
-                            className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-amber-50 hover:text-amber-700 disabled:opacity-40"
-                            title="Reverse payment"
-                          >
-                            <RotateCcw
-                              size={
-                                15
-                              }
-                            />
-                          </button>
-
-                        </div>
-
-                      )
-                    )}
-
-                </div>
-
-              )}
-
-            </div>
-
-
-            {/* EDIT MEMBER */}
-
-            <form
-              onSubmit={
-                handleEdit
-              }
-              className="mt-6"
-            >
-
-              <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                Edit Member
-              </h3>
-
-
-              <label
-                htmlFor="edit-member-name"
-                className="mt-3 block text-xs font-medium text-zinc-600"
-              >
-                Name
-              </label>
-
-
-              <input
-                id="edit-member-name"
-                name="name"
-                type="text"
-                defaultValue={
-                  selectedMember.name
-                }
-                className="mt-2 w-full rounded-xl border border-zinc-200 px-3.5 py-3 text-sm outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-100"
-                required
-              />
-
-
-              {error && (
-                <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {error}
-                </p>
-              )}
-
-
-              <button
-                type="submit"
-                disabled={
-                  loading
-                }
-                className="mt-3 w-full rounded-xl bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
-              >
-                {loading
-                  ? "Saving..."
-                  : "Save Changes"}
-              </button>
-
-            </form>
-
-
-            {/* DELETE MEMBER */}
-
-            <div className="mt-6 border-t border-zinc-100 pt-5">
+            <div className="mb-5 grid grid-cols-3 rounded-xl bg-zinc-100 p-1">
 
               <button
                 type="button"
-                disabled={
-                  loading
+                onClick={() =>
+                  setModalView(
+                    "overview"
+                  )
                 }
-                onClick={
-                  handleDeleteMember
-                }
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700 transition hover:bg-red-100 disabled:opacity-40"
-              >
-                <Trash2
-                  size={
-                    15
-                  }
-                />
+                className={`
+                  rounded-lg
+                  px-2
+                  py-2
+                  text-xs
+                  font-medium
+                  transition
 
-                Delete Member
+                  ${
+                    modalView ===
+                    "overview"
+                      ? "bg-white text-zinc-950 shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-900"
+                  }
+                `}
+              >
+                Overview
               </button>
 
 
-              <p className="mt-2 text-center text-[11px] leading-4 text-zinc-400">
-                This also removes the member&apos;s payment history.
-              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  setModalView(
+                    "history"
+                  )
+                }
+                className={`
+                  rounded-lg
+                  px-2
+                  py-2
+                  text-xs
+                  font-medium
+                  transition
+
+                  ${
+                    modalView ===
+                    "history"
+                      ? "bg-white text-zinc-950 shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-900"
+                  }
+                `}
+              >
+                Payments
+              </button>
+
+
+              <button
+                type="button"
+                onClick={() =>
+                  setModalView(
+                    "edit"
+                  )
+                }
+                className={`
+                  rounded-lg
+                  px-2
+                  py-2
+                  text-xs
+                  font-medium
+                  transition
+
+                  ${
+                    modalView ===
+                    "edit"
+                      ? "bg-white text-zinc-950 shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-900"
+                  }
+                `}
+              >
+                Edit
+              </button>
 
             </div>
+
+
+            {/* =================================
+                OVERVIEW
+            ================================= */}
+
+            {modalView ===
+              "overview" && (
+
+              <div>
+
+                <div className="rounded-2xl bg-zinc-50 p-4">
+
+                  <div className="flex items-end justify-between gap-4">
+
+                    <div>
+
+                      <p className="text-xs font-medium text-zinc-500">
+                        Total paid
+                      </p>
+
+
+                      <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-zinc-950">
+
+                        {formatMoney(
+                          selectedMember.amountPaid
+                        )}
+
+                      </p>
+
+                    </div>
+
+
+                    <p className="text-sm font-medium tabular-nums text-zinc-400">
+
+                      /{" "}
+
+                      {formatMoney(
+                        contributionPerPerson
+                      )}
+
+                    </p>
+
+                  </div>
+
+
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-zinc-200">
+
+                    <div
+                      className="h-full rounded-full bg-zinc-900 transition-all duration-500"
+                      style={{
+                        width: `${Math.min(
+                          (
+                            selectedMember.amountPaid /
+                            contributionPerPerson
+                          ) *
+                            100,
+                          100
+                        )}%`,
+                      }}
+                    />
+
+                  </div>
+
+
+                  <div className="mt-3 flex items-center justify-between gap-3">
+
+                    <span className="text-xs text-zinc-500">
+                      Contribution progress
+                    </span>
+
+
+                    <span className="text-xs font-medium tabular-nums text-zinc-700">
+
+                      {selectedMember.amountPaid >=
+                      contributionPerPerson
+                        ? "Completed"
+                        : `${formatMoney(
+                            Math.max(
+                              contributionPerPerson -
+                                selectedMember.amountPaid,
+                              0
+                            )
+                          )} remaining`}
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setModalView(
+                        "history"
+                      )
+                    }
+                    className="flex items-center justify-center gap-2 rounded-xl border border-zinc-200 px-3 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                  >
+                    <History
+                      size={15}
+                    />
+
+                    Payments
+                  </button>
+
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setModalView(
+                        "edit"
+                      )
+                    }
+                    className="flex items-center justify-center gap-2 rounded-xl border border-zinc-200 px-3 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                  >
+                    <Pencil
+                      size={15}
+                    />
+
+                    Edit member
+                  </button>
+
+                </div>
+
+              </div>
+            )}
+
+
+            {/* =================================
+                PAYMENT HISTORY
+            ================================= */}
+
+            {modalView ===
+              "history" && (
+
+              <div>
+
+                <div className="flex items-center justify-between">
+
+                  <div>
+
+                    <h3 className="text-sm font-semibold text-zinc-900">
+                      Payment history
+                    </h3>
+
+                    <p className="mt-1 text-xs text-zinc-500">
+                      All recorded contributions from this member.
+                    </p>
+
+                  </div>
+
+
+                  <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-600">
+                    {
+                      selectedMember
+                        .contributions
+                        .length
+                    }
+                  </span>
+
+                </div>
+
+
+                {selectedMember
+                  .contributions
+                  .length ===
+                0 ? (
+
+                  <div className="mt-4 rounded-2xl border border-dashed border-zinc-200 px-5 py-8 text-center">
+
+                    <History
+                      size={22}
+                      className="mx-auto text-zinc-300"
+                    />
+
+                    <p className="mt-3 text-sm font-medium text-zinc-600">
+                      No payments yet
+                    </p>
+
+                    <p className="mt-1 text-xs text-zinc-400">
+                      Payments recorded for this member will appear here.
+                    </p>
+
+                  </div>
+
+                ) : (
+
+                  <div className="mt-4 divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200">
+
+                    {selectedMember
+                      .contributions
+                      .map(
+                        (
+                          contribution
+                        ) => (
+
+                          <div
+                            key={
+                              contribution.id
+                            }
+                            className="flex items-center gap-3 px-4 py-3"
+                          >
+
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                              <span className="text-sm font-semibold">
+                                +
+                              </span>
+                            </div>
+
+
+                            <div className="min-w-0 flex-1">
+
+                              <p className="text-sm font-semibold tabular-nums text-zinc-900">
+                                {formatMoney(
+                                  contribution.amount
+                                )}
+                              </p>
+
+
+                              <p className="mt-0.5 text-[11px] text-zinc-500">
+                                {formatDateTime(
+                                  contribution.createdAt
+                                )}
+                              </p>
+
+                            </div>
+
+
+                            {canManage && (
+
+                              <button
+                                type="button"
+                                disabled={
+                                  loading
+                                }
+                                onClick={() =>
+                                  handleDeletePayment(
+                                    contribution.id,
+                                    contribution.amount
+                                  )
+                                }
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-amber-50 hover:text-amber-700 disabled:opacity-40"
+                                title="Reverse payment"
+                              >
+                                <RotateCcw
+                                  size={
+                                    14
+                                  }
+                                />
+                              </button>
+
+                            )}
+
+                          </div>
+
+                        )
+                      )}
+
+                  </div>
+
+                )}
+
+              </div>
+            )}
+
+
+            {/* =================================
+                EDIT
+            ================================= */}
+
+            {modalView ===
+              "edit" && (
+
+              <div>
+
+                <form
+                  onSubmit={
+                    handleEdit
+                  }
+                >
+
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    Edit member
+                  </h3>
+
+
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Update this member&apos;s information.
+                  </p>
+
+
+                  <label
+                    htmlFor="edit-member-name"
+                    className="mt-5 block text-xs font-medium text-zinc-600"
+                  >
+                    Name
+                  </label>
+
+
+                  <input
+                    key={
+                      selectedMember.id
+                    }
+                    id="edit-member-name"
+                    name="name"
+                    type="text"
+                    defaultValue={
+                      selectedMember.name
+                    }
+                    className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-3 text-sm text-zinc-950 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-100"
+                    required
+                  />
+
+
+                  {error && (
+
+                    <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+                      {error}
+                    </p>
+
+                  )}
+
+
+                  <button
+                    type="submit"
+                    disabled={
+                      loading
+                    }
+                    className="mt-4 w-full rounded-xl bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
+                  >
+                    {loading
+                      ? "Saving..."
+                      : "Save changes"}
+                  </button>
+
+                </form>
+
+
+                {/* DANGER ZONE */}
+
+                {canManage && (
+
+                  <div className="mt-6 border-t border-zinc-100 pt-5">
+
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-400">
+                      Danger zone
+                    </p>
+
+
+                    <button
+                      type="button"
+                      disabled={
+                        loading
+                      }
+                      onClick={
+                        handleDeleteMember
+                      }
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700 transition hover:bg-red-100 disabled:opacity-40"
+                    >
+                      <Trash2
+                        size={15}
+                      />
+
+                      Delete member
+                    </button>
+
+
+                    <p className="mt-2 text-center text-[11px] leading-4 text-zinc-400">
+                      This also removes the member&apos;s payment history.
+                    </p>
+
+                  </div>
+
+                )}
+
+              </div>
+            )}
 
           </>
         )}

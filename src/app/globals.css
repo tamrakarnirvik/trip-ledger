@@ -9,6 +9,9 @@ html {
   scroll-behavior: smooth;
 }
 
+html {
+  scroll-behavior: smooth;
+}
 body {
   margin: 0;
   background: #f7f7f8;

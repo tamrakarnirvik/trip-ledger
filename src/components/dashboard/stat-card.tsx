@@ -9,13 +9,70 @@ import {
 } from "motion/react";
 
 
+type StatTone =
+  | "violet"
+  | "emerald"
+  | "rose"
+  | "blue";
+
+
 type StatCardProps = {
   title: string;
   value: string;
   description: string;
   icon: ReactNode;
+
   highlight?: boolean;
+
+  tone?: StatTone;
+
   delay?: number;
+};
+
+
+const toneStyles: Record<
+  StatTone,
+  {
+    icon: string;
+    accent: string;
+  }
+> = {
+
+  violet: {
+    icon:
+      "bg-violet-50 text-violet-700",
+
+    accent:
+      "bg-violet-500",
+  },
+
+
+  emerald: {
+    icon:
+      "bg-emerald-50 text-emerald-700",
+
+    accent:
+      "bg-emerald-500",
+  },
+
+
+  rose: {
+    icon:
+      "bg-rose-50 text-rose-700",
+
+    accent:
+      "bg-rose-500",
+  },
+
+
+  blue: {
+    icon:
+      "bg-sky-50 text-sky-700",
+
+    accent:
+      "bg-sky-500",
+  },
+
 };
 
 
@@ -24,14 +81,24 @@ export function StatCard({
   value,
   description,
   icon,
+
   highlight = false,
+
+  tone = "blue",
+
   delay = 0,
 }: StatCardProps) {
+
+  const toneStyle =
+    toneStyles[tone];
+
+
   return (
+
     <motion.div
       initial={{
         opacity: 0,
-        y: 10,
+        y: 12,
       }}
       animate={{
         opacity: 1,
@@ -47,74 +114,204 @@ export function StatCard({
           1,
         ],
       }}
-      className={[
-        "rounded-[24px] border p-5 shadow-sm transition",
-        highlight
-          ? "border-zinc-900 bg-zinc-950 text-white"
-          : "border-zinc-200 bg-white text-zinc-950",
-      ].join(" ")}
+      whileHover={{
+        y: -2,
+      }}
+      className={`
+        relative
+        h-full
+        min-h-[148px]
+        overflow-hidden
+        rounded-[24px]
+        border
+        p-4
+        transition-shadow
+        duration-200
+
+        sm:min-h-[160px]
+        sm:p-5
+
+        ${
+          highlight
+            ? `
+              border-zinc-900
+              bg-zinc-950
+              text-white
+              shadow-[0_10px_30px_rgba(0,0,0,0.10)]
+            `
+            : `
+              border-zinc-200
+              bg-white
+              text-zinc-950
+              shadow-sm
+              hover:shadow-md
+            `
+        }
+      `}
     >
-      <div className="flex items-start justify-between gap-4">
 
-        {/* TEXT */}
+      {/* subtle decorative background */}
 
-        <div className="min-w-0">
+      {highlight && (
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -right-8
+            -top-8
+            h-28
+            w-28
+            rounded-full
+            bg-white/[0.035]
+          "
+        />
+
+      )}
+
+
+      <div className="relative flex h-full flex-col">
+
+        {/* TOP */}
+
+        <div className="flex items-start justify-between gap-3">
+
+          <div className="min-w-0">
+
+            <div className="flex items-center gap-2">
+
+              {/* SMALL ACCENT */}
+
+              {!highlight && (
+
+                <span
+                  className={`
+                    h-1.5
+                    w-1.5
+                    shrink-0
+                    rounded-full
+                    ${toneStyle.accent}
+                  `}
+                />
+
+              )}
+
+
+              <p
+                className={`
+                  truncate
+                  text-[11px]
+                  font-medium
+
+                  sm:text-xs
+
+                  ${
+                    highlight
+                      ? "text-zinc-300"
+                      : "text-zinc-500"
+                  }
+                `}
+              >
+
+                {title}
+
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* ICON */}
+
+          <div
+            className={`
+              flex
+              h-9
+              w-9
+              shrink-0
+              items-center
+              justify-center
+              rounded-xl
+
+              sm:h-10
+              sm:w-10
+
+              ${
+                highlight
+                  ? "bg-white/10 text-white"
+                  : toneStyle.icon
+              }
+            `}
+          >
+
+            {icon}
+
+          </div>
+
+        </div>
+
+
+        {/* VALUE */}
+
+        <div className="mt-4">
 
           <p
-            className={[
-              "text-sm font-medium",
-              highlight
-                ? "text-zinc-300"
-                : "text-zinc-500",
-            ].join(" ")}
-          >
-            {title}
-          </p>
-
-
-          <h3
-            className="
-              mt-4
-              text-[1.75rem]
+            className={`
+              whitespace-nowrap
+              text-[1.35rem]
               font-semibold
-              leading-tight
+              leading-none
               tracking-tight
+              tabular-nums
 
-              lg:text-[1.9rem]
-            "
+              sm:text-[1.65rem]
+              xl:text-[1.75rem]
+
+              ${
+                highlight
+                  ? "text-white"
+                  : "text-zinc-950"
+              }
+            `}
           >
+
             {value}
-          </h3>
 
-
-          <p
-            className={[
-              "mt-2 text-xs leading-5",
-              highlight
-                ? "text-zinc-400"
-                : "text-zinc-500",
-            ].join(" ")}
-          >
-            {description}
           </p>
 
         </div>
 
 
-        {/* ICON */}
+        {/* DESCRIPTION */}
 
-        <div
-          className={[
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
-            highlight
-              ? "bg-white/10 text-white"
-              : "bg-zinc-50 text-zinc-500",
-          ].join(" ")}
-        >
-          {icon}
+        <div className="mt-auto pt-3">
+
+          <p
+            className={`
+              text-[10px]
+              leading-4
+
+              sm:text-xs
+              sm:leading-5
+
+              ${
+                highlight
+                  ? "text-zinc-400"
+                  : "text-zinc-500"
+              }
+            `}
+          >
+
+            {description}
+
+          </p>
+
         </div>
 
       </div>
+
     </motion.div>
+
   );
 }

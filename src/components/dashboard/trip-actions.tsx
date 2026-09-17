@@ -8,10 +8,6 @@ import {
 import Link from "next/link";
 
 import {
-  useRouter,
-} from "next/navigation";
-
-import {
   Banknote,
   FileText,
   Plus,
@@ -20,6 +16,11 @@ import {
 } from "lucide-react";
 
 import {
+  useRouter,
+} from "next/navigation";
+
+import {
+  AnimatePresence,
   motion,
 } from "motion/react";
 
@@ -53,12 +54,18 @@ type ModalType =
   | null;
 
 
+/*
+ * Get today's date in YYYY-MM-DD
+ * format for the expense form.
+ */
 function getToday() {
   const today =
     new Date();
 
+
   const year =
     today.getFullYear();
+
 
   const month =
     String(
@@ -68,6 +75,7 @@ function getToday() {
       "0"
     );
 
+
   const day =
     String(
       today.getDate()
@@ -75,6 +83,7 @@ function getToday() {
       2,
       "0"
     );
+
 
   return `${year}-${month}-${day}`;
 }
@@ -85,6 +94,7 @@ export function TripActions({
   members,
   contributionPerPerson,
 }: TripActionsProps) {
+
   const router =
     useRouter();
 
@@ -146,6 +156,9 @@ export function TripActions({
       : 0;
 
 
+  /*
+   * Open one of the action modals.
+   */
   function openModal(
     modal: ModalType
   ) {
@@ -157,10 +170,14 @@ export function TripActions({
   }
 
 
+  /*
+   * Close active modal.
+   */
   function closeModal() {
     if (loading) {
       return;
     }
+
 
     setError("");
 
@@ -170,6 +187,9 @@ export function TripActions({
   }
 
 
+  /*
+   * Shared POST helper.
+   */
   async function sendRequest(
     url: string,
     body: object
@@ -213,9 +233,11 @@ export function TripActions({
   }
 
 
+  /*
+   * ADD MEMBER
+   */
   async function handleAddMember(
-    event:
-      React.FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
@@ -239,8 +261,14 @@ export function TripActions({
 
 
     try {
-      setLoading(true);
-      setError("");
+
+      setLoading(
+        true
+      );
+
+      setError(
+        ""
+      );
 
 
       await sendRequest(
@@ -261,21 +289,30 @@ export function TripActions({
 
 
       router.refresh();
+
     } catch (error) {
+
       setError(
         error instanceof Error
           ? error.message
           : "Unable to add member."
       );
+
     } finally {
-      setLoading(false);
+
+      setLoading(
+        false
+      );
+
     }
   }
 
 
+  /*
+   * RECORD PAYMENT
+   */
   async function handlePayment(
-    event:
-      React.FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
@@ -307,8 +344,14 @@ export function TripActions({
 
 
     try {
-      setLoading(true);
-      setError("");
+
+      setLoading(
+        true
+      );
+
+      setError(
+        ""
+      );
 
 
       await sendRequest(
@@ -326,21 +369,30 @@ export function TripActions({
 
 
       router.refresh();
+
     } catch (error) {
+
       setError(
         error instanceof Error
           ? error.message
           : "Unable to record payment."
       );
+
     } finally {
-      setLoading(false);
+
+      setLoading(
+        false
+      );
+
     }
   }
 
 
+  /*
+   * ADD EXPENSE
+   */
   async function handleExpense(
-    event:
-      React.FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
@@ -388,8 +440,14 @@ export function TripActions({
 
 
     try {
-      setLoading(true);
-      setError("");
+
+      setLoading(
+        true
+      );
+
+      setError(
+        ""
+      );
 
 
       await sendRequest(
@@ -413,14 +471,21 @@ export function TripActions({
 
 
       router.refresh();
+
     } catch (error) {
+
       setError(
         error instanceof Error
           ? error.message
           : "Unable to add expense."
       );
+
     } finally {
-      setLoading(false);
+
+      setLoading(
+        false
+      );
+
     }
   }
 
@@ -436,175 +501,584 @@ export function TripActions({
   return (
     <>
 
-      {/* =================================
-          ACTION BUTTONS
-          Mobile = fixed bottom navigation
-          Desktop = original button row
-      ================================= */}
+      {/* ==========================================
+          DESKTOP ACTION BUTTONS
+          Hidden below md
+      ========================================== */}
 
-      {/* ACTION BUTTONS */}
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 8,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        transition={{
+          delay: 0.1,
+          duration: 0.35,
+        }}
+        className="
+          hidden
+          flex-wrap
+          items-center
+          gap-2
 
-<motion.div
-    initial={{
-      opacity: 0,
-      y: 10,
-    }}
-    animate={{
-      opacity: 1,
-      y: 0,
-    }}
-    transition={{
-      delay: 0.1,
-      duration: 0.4,
-      ease: [0.22, 1, 0.36, 1],
-    }}
-    className="hidden md:flex md:flex-wrap md:gap-2"
-  >
-    <button
-      type="button"
-      onClick={() =>
-        openModal("member")
-      }
-      className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98]"
-    >
-      <UserPlus
-        size={16}
-        strokeWidth={1.8}
-      />
-      Add Member
-    </button>
+          md:flex
+        "
+      >
 
-    <button
-      type="button"
-      onClick={() =>
-        openModal("payment")
-      }
-      disabled={members.length === 0}
-      className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-    >
-      <Banknote
-        size={16}
-        strokeWidth={1.8}
-      />
-      Record Payment
-    </button>
+        {/* ADD MEMBER */}
 
-    <button
-      type="button"
-      onClick={() =>
-        openModal("expense")
-      }
-      className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 active:scale-[0.98]"
-    >
-      <Plus
-        size={16}
-        strokeWidth={1.8}
-      />
-      Add Expense
-    </button>
-
-    <Link
-      href="/report"
-      className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98]"
-    >
-      <FileText
-        size={16}
-        strokeWidth={1.8}
-      />
-      Report
-    </Link>
-  </motion.div>
-
-  {/* MOBILE BOTTOM NAV */}
-  <motion.div
-    initial={{
-      opacity: 0,
-      y: 16,
-    }}
-    animate={{
-      opacity: 1,
-      y: 0,
-    }}
-    transition={{
-      delay: 0.12,
-      duration: 0.42,
-      ease: [0.22, 1, 0.36, 1],
-    }}
-    className="fixed inset-x-0 bottom-4 z-50 px-4 md:hidden"
-  >
-    <div className="mx-auto max-w-md rounded-[34px] border border-zinc-200/80 bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.8rem)] pt-4 shadow-[0_18px_50px_rgba(0,0,0,0.10)] backdrop-blur-xl">
-      <div className="grid grid-cols-[1fr_1fr_auto_1fr] items-end gap-2">
         <button
           type="button"
           onClick={() =>
-            openModal("member")
+            openModal(
+              "member"
+            )
           }
-          className="flex min-w-0 flex-col items-center justify-center gap-2 rounded-2xl px-2 py-2 text-zinc-500 transition hover:bg-zinc-50 active:scale-[0.97]"
+          className="
+            inline-flex
+            min-h-10
+            items-center
+            gap-2
+            rounded-xl
+            border
+            border-zinc-200
+            bg-white
+            px-4
+            py-2.5
+            text-sm
+            font-medium
+            text-zinc-700
+            transition
+
+            hover:border-zinc-300
+            hover:bg-zinc-50
+
+            active:scale-[0.98]
+          "
         >
+
           <UserPlus
-            size={22}
-            strokeWidth={1.8}
+            size={16}
           />
-          <span className="text-[11px] font-medium leading-none">
-            Members
-          </span>
+
+          Add Member
+
         </button>
+
+
+        {/* RECORD PAYMENT */}
 
         <button
           type="button"
           onClick={() =>
-            openModal("payment")
+            openModal(
+              "payment"
+            )
           }
-          disabled={members.length === 0}
-          className="flex min-w-0 flex-col items-center justify-center gap-2 rounded-2xl px-2 py-2 text-zinc-500 transition hover:bg-zinc-50 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={
+            members.length ===
+            0
+          }
+          className="
+            inline-flex
+            min-h-10
+            items-center
+            gap-2
+            rounded-xl
+            border
+            border-zinc-200
+            bg-white
+            px-4
+            py-2.5
+            text-sm
+            font-medium
+            text-zinc-700
+            transition
+
+            hover:border-zinc-300
+            hover:bg-zinc-50
+
+            active:scale-[0.98]
+
+            disabled:cursor-not-allowed
+            disabled:opacity-40
+          "
         >
+
           <Banknote
-            size={22}
-            strokeWidth={1.8}
+            size={16}
           />
-          <span className="text-[11px] font-medium leading-none">
-            Record
-          </span>
+
+          Record Payment
+
         </button>
+
+
+        {/* ADD EXPENSE */}
 
         <button
           type="button"
           onClick={() =>
-            openModal("expense")
+            openModal(
+              "expense"
+            )
           }
-          className="-mt-10 flex h-24 w-24 items-center justify-center self-start rounded-full bg-zinc-950 text-white shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition hover:bg-zinc-800 active:scale-[0.97]"
+          className="
+            inline-flex
+            min-h-10
+            items-center
+            gap-2
+            rounded-xl
+            bg-zinc-900
+            px-4
+            py-2.5
+            text-sm
+            font-medium
+            text-white
+            transition
+
+            hover:bg-zinc-800
+
+            active:scale-[0.98]
+          "
         >
-          <div className="flex flex-col items-center gap-2">
-            <Plus
-              size={28}
-              strokeWidth={2}
-            />
-            <span className="text-[11px] font-medium leading-none">
-              Add Expense
-            </span>
-          </div>
+
+          <Plus
+            size={16}
+          />
+
+          Add Expense
+
         </button>
+
+
+        {/* REPORT */}
 
         <Link
           href="/report"
-          className="flex min-w-0 flex-col items-center justify-center gap-2 rounded-2xl px-2 py-2 text-zinc-500 transition hover:bg-zinc-50 active:scale-[0.97]"
+          className="
+            inline-flex
+            min-h-10
+            items-center
+            gap-2
+            rounded-xl
+            border
+            border-zinc-200
+            bg-white
+            px-4
+            py-2.5
+            text-sm
+            font-medium
+            text-zinc-700
+            transition
+
+            hover:border-zinc-300
+            hover:bg-zinc-50
+
+            active:scale-[0.98]
+          "
         >
+
           <FileText
-            size={22}
-            strokeWidth={1.8}
+            size={16}
           />
-          <span className="text-[11px] font-medium leading-none">
-            Report
-          </span>
+
+          Report
+
         </Link>
-      </div>
-    </div>
-  </motion.div>
+
+      </motion.div>
 
 
-      {/* =================================
+      {/* ==========================================
+          MOBILE FLOATING NAVIGATION
+      ========================================== */}
+
+      <AnimatePresence>
+
+        {activeModal ===
+          null && (
+
+          <div
+            className="
+              fixed
+              inset-x-3
+              bottom-[calc(env(safe-area-inset-bottom)+0.75rem)]
+              z-50
+              mx-auto
+              max-w-md
+
+              md:hidden
+            "
+          >
+
+            <motion.nav
+              initial={{
+                opacity: 0,
+                y: 18,
+                scale: 0.98,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                y: 14,
+                scale: 0.98,
+              }}
+              transition={{
+                duration: 0.22,
+                ease: [
+                  0.22,
+                  1,
+                  0.36,
+                  1,
+                ],
+              }}
+              aria-label="Trip actions"
+              className="
+                grid
+                grid-cols-4
+                items-end
+
+                rounded-[22px]
+                border
+                border-zinc-200/90
+
+                bg-white/95
+
+                px-1.5
+                pb-1.5
+                pt-1.5
+
+                shadow-[0_14px_45px_rgba(0,0,0,0.14)]
+
+                backdrop-blur-xl
+              "
+            >
+
+              {/* =========================
+                  MEMBER
+              ========================= */}
+
+              <button
+                type="button"
+                onClick={() =>
+                  openModal(
+                    "member"
+                  )
+                }
+                className="
+                  group
+                  flex
+                  min-w-0
+                  flex-col
+                  items-center
+                  justify-center
+                  gap-1
+
+                  rounded-2xl
+
+                  px-1
+                  py-2
+
+                  text-zinc-500
+
+                  transition
+
+                  active:scale-95
+                  active:bg-zinc-100
+                "
+              >
+
+                <div
+                  className="
+                    flex
+                    h-8
+                    w-8
+                    items-center
+                    justify-center
+                    rounded-xl
+
+                    transition
+
+                    group-active:bg-zinc-200
+                    group-active:text-zinc-950
+                  "
+                >
+
+                  <UserPlus
+                    size={18}
+                    strokeWidth={1.8}
+                  />
+
+                </div>
+
+
+                <span
+                  className="
+                    max-w-full
+                    truncate
+                    text-[10px]
+                    font-medium
+                    leading-none
+                  "
+                >
+                  Member
+                </span>
+
+              </button>
+
+
+              {/* =========================
+                  PAYMENT
+              ========================= */}
+
+              <button
+                type="button"
+                disabled={
+                  members.length ===
+                  0
+                }
+                onClick={() =>
+                  openModal(
+                    "payment"
+                  )
+                }
+                className="
+                  group
+                  flex
+                  min-w-0
+                  flex-col
+                  items-center
+                  justify-center
+                  gap-1
+
+                  rounded-2xl
+
+                  px-1
+                  py-2
+
+                  text-zinc-500
+
+                  transition
+
+                  active:scale-95
+                  active:bg-zinc-100
+
+                  disabled:pointer-events-none
+                  disabled:opacity-30
+                "
+              >
+
+                <div
+                  className="
+                    flex
+                    h-8
+                    w-8
+                    items-center
+                    justify-center
+                    rounded-xl
+
+                    transition
+
+                    group-active:bg-zinc-200
+                    group-active:text-zinc-950
+                  "
+                >
+
+                  <Banknote
+                    size={18}
+                    strokeWidth={1.8}
+                  />
+
+                </div>
+
+
+                <span
+                  className="
+                    max-w-full
+                    truncate
+                    text-[10px]
+                    font-medium
+                    leading-none
+                  "
+                >
+                  Payment
+                </span>
+
+              </button>
+
+
+              {/* =========================
+                  ADD EXPENSE
+                  Primary mobile action
+              ========================= */}
+
+              <button
+                type="button"
+                onClick={() =>
+                  openModal(
+                    "expense"
+                  )
+                }
+                className="
+                  group
+                  relative
+                  flex
+                  min-w-0
+                  flex-col
+                  items-center
+                  justify-end
+                  gap-1
+
+                  rounded-2xl
+
+                  px-1
+                  pb-2
+
+                  text-zinc-950
+
+                  transition
+
+                  active:scale-[0.97]
+                "
+              >
+
+                <div
+                  className="
+                    -mt-5
+                    flex
+                    h-12
+                    w-12
+                    items-center
+                    justify-center
+
+                    rounded-2xl
+
+                    border-[4px]
+                    border-white
+
+                    bg-zinc-950
+                    text-white
+
+                    shadow-[0_8px_22px_rgba(0,0,0,0.22)]
+
+                    transition
+
+                    group-active:scale-95
+                    group-active:bg-zinc-800
+                  "
+                >
+
+                  <Plus
+                    size={21}
+                    strokeWidth={2}
+                  />
+
+                </div>
+
+
+                <span
+                  className="
+                    max-w-full
+                    truncate
+                    text-[10px]
+                    font-semibold
+                    leading-none
+                  "
+                >
+                  Expense
+                </span>
+
+              </button>
+
+
+              {/* =========================
+                  REPORT
+              ========================= */}
+
+              <Link
+                href="/report"
+                className="
+                  group
+                  flex
+                  min-w-0
+                  flex-col
+                  items-center
+                  justify-center
+                  gap-1
+
+                  rounded-2xl
+
+                  px-1
+                  py-2
+
+                  text-zinc-500
+
+                  transition
+
+                  active:scale-95
+                  active:bg-zinc-100
+                "
+              >
+
+                <div
+                  className="
+                    flex
+                    h-8
+                    w-8
+                    items-center
+                    justify-center
+                    rounded-xl
+
+                    transition
+
+                    group-active:bg-zinc-200
+                    group-active:text-zinc-950
+                  "
+                >
+
+                  <FileText
+                    size={18}
+                    strokeWidth={1.8}
+                  />
+
+                </div>
+
+
+                <span
+                  className="
+                    max-w-full
+                    truncate
+                    text-[10px]
+                    font-medium
+                    leading-none
+                  "
+                >
+                  Report
+                </span>
+
+              </Link>
+
+            </motion.nav>
+
+          </div>
+
+        )}
+
+      </AnimatePresence>
+
+
+      {/* ==========================================
           ADD MEMBER MODAL
-      ================================= */}
+      ========================================== */}
 
       <Modal
         open={
@@ -617,6 +1091,7 @@ export function TripActions({
         title="Add member"
         description="Add another person to the trip."
       >
+
         <form
           onSubmit={
             handleAddMember
@@ -647,20 +1122,50 @@ export function TripActions({
 
 
           {error && (
-            <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+
+            <p
+              className="
+                mt-3
+                rounded-xl
+                bg-red-50
+                px-3
+                py-2
+                text-sm
+                text-red-700
+              "
+            >
               {error}
             </p>
+
           )}
 
 
-          <div className="mt-6 flex gap-2">
+          <div className="mt-5 flex gap-2">
 
             <button
               type="button"
               onClick={
                 closeModal
               }
-              className="flex-1 rounded-xl border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+              disabled={
+                loading
+              }
+              className="
+                flex-1
+                rounded-xl
+                border
+                border-zinc-200
+                px-4
+                py-3
+                text-sm
+                font-medium
+                text-zinc-700
+                transition
+
+                hover:bg-zinc-50
+
+                disabled:opacity-40
+              "
             >
               Cancel
             </button>
@@ -671,22 +1176,39 @@ export function TripActions({
               disabled={
                 loading
               }
-              className="flex-1 rounded-xl bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
+              className="
+                flex-1
+                rounded-xl
+                bg-zinc-900
+                px-4
+                py-3
+                text-sm
+                font-medium
+                text-white
+                transition
+
+                hover:bg-zinc-800
+
+                disabled:opacity-50
+              "
             >
+
               {loading
                 ? "Adding..."
                 : "Add Member"}
+
             </button>
 
           </div>
 
         </form>
+
       </Modal>
 
 
-      {/* =================================
+      {/* ==========================================
           RECORD PAYMENT MODAL
-      ================================= */}
+      ========================================== */}
 
       <Modal
         open={
@@ -699,11 +1221,14 @@ export function TripActions({
         title="Record payment"
         description="Add money received from a trip member."
       >
+
         <form
           onSubmit={
             handlePayment
           }
         >
+
+          {/* MEMBER */}
 
           <div>
 
@@ -740,6 +1265,7 @@ export function TripActions({
 
               {members.map(
                 (member) => (
+
                   <option
                     key={
                       member.id
@@ -752,6 +1278,7 @@ export function TripActions({
                       member.name
                     }
                   </option>
+
                 )
               )}
 
@@ -759,6 +1286,8 @@ export function TripActions({
 
           </div>
 
+
+          {/* AMOUNT */}
 
           <div className="mt-4">
 
@@ -785,46 +1314,108 @@ export function TripActions({
               className={
                 inputClasses
               }
+              inputMode="numeric"
               required
             />
 
 
             {selectedMember && (
-              <p className="mt-2 text-xs text-zinc-500">
 
-                Paid{" "}
-                {formatMoney(
-                  selectedMember.amountPaid
-                )}
+              <div
+                className="
+                  mt-3
+                  flex
+                  items-center
+                  justify-between
+                  gap-3
+                  rounded-xl
+                  bg-zinc-50
+                  px-3
+                  py-2.5
+                "
+              >
 
-                {" · "}
+                <div>
 
-                Remaining{" "}
-                {formatMoney(
-                  remaining
-                )}
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-400">
+                    Paid
+                  </p>
 
-              </p>
+                  <p className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-700">
+                    {formatMoney(
+                      selectedMember.amountPaid
+                    )}
+                  </p>
+
+                </div>
+
+
+                <div className="text-right">
+
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-400">
+                    Remaining
+                  </p>
+
+                  <p className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-700">
+                    {formatMoney(
+                      remaining
+                    )}
+                  </p>
+
+                </div>
+
+              </div>
+
             )}
 
           </div>
 
 
           {error && (
-            <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+
+            <p
+              className="
+                mt-3
+                rounded-xl
+                bg-red-50
+                px-3
+                py-2
+                text-sm
+                text-red-700
+              "
+            >
               {error}
             </p>
+
           )}
 
 
-          <div className="mt-6 flex gap-2">
+          <div className="mt-5 flex gap-2">
 
             <button
               type="button"
               onClick={
                 closeModal
               }
-              className="flex-1 rounded-xl border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+              disabled={
+                loading
+              }
+              className="
+                flex-1
+                rounded-xl
+                border
+                border-zinc-200
+                px-4
+                py-3
+                text-sm
+                font-medium
+                text-zinc-700
+                transition
+
+                hover:bg-zinc-50
+
+                disabled:opacity-40
+              "
             >
               Cancel
             </button>
@@ -837,22 +1428,40 @@ export function TripActions({
                 remaining <=
                   0
               }
-              className="flex-1 rounded-xl bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+              className="
+                flex-1
+                rounded-xl
+                bg-zinc-900
+                px-4
+                py-3
+                text-sm
+                font-medium
+                text-white
+                transition
+
+                hover:bg-zinc-800
+
+                disabled:cursor-not-allowed
+                disabled:opacity-40
+              "
             >
+
               {loading
                 ? "Saving..."
                 : "Save Payment"}
+
             </button>
 
           </div>
 
         </form>
+
       </Modal>
 
 
-      {/* =================================
+      {/* ==========================================
           ADD EXPENSE MODAL
-      ================================= */}
+      ========================================== */}
 
       <Modal
         open={
@@ -865,11 +1474,14 @@ export function TripActions({
         title="Add expense"
         description="Record money spent for the trip."
       >
+
         <form
           onSubmit={
             handleExpense
           }
         >
+
+          {/* EXPENSE TITLE */}
 
           <div>
 
@@ -897,6 +1509,8 @@ export function TripActions({
 
           </div>
 
+
+          {/* CATEGORY */}
 
           <div className="mt-4">
 
@@ -947,7 +1561,18 @@ export function TripActions({
           </div>
 
 
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* AMOUNT + DATE */}
+
+          <div
+            className="
+              mt-4
+              grid
+              grid-cols-2
+              gap-3
+            "
+          >
+
+            {/* AMOUNT */}
 
             <div>
 
@@ -970,11 +1595,14 @@ export function TripActions({
                 className={
                   inputClasses
                 }
+                inputMode="numeric"
                 required
               />
 
             </div>
 
+
+            {/* DATE */}
 
             <div>
 
@@ -1006,21 +1634,55 @@ export function TripActions({
           </div>
 
 
+          {/* ERROR */}
+
           {error && (
-            <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+
+            <p
+              className="
+                mt-3
+                rounded-xl
+                bg-red-50
+                px-3
+                py-2
+                text-sm
+                text-red-700
+              "
+            >
               {error}
             </p>
+
           )}
 
 
-          <div className="mt-6 flex gap-2">
+          {/* BUTTONS */}
+
+          <div className="mt-5 flex gap-2">
 
             <button
               type="button"
               onClick={
                 closeModal
               }
-              className="flex-1 rounded-xl border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+              disabled={
+                loading
+              }
+              className="
+                flex-1
+                rounded-xl
+                border
+                border-zinc-200
+                px-4
+                py-3
+                text-sm
+                font-medium
+                text-zinc-700
+                transition
+
+                hover:bg-zinc-50
+
+                disabled:opacity-40
+              "
             >
               Cancel
             </button>
@@ -1031,21 +1693,39 @@ export function TripActions({
               disabled={
                 loading
               }
-              className="flex-1 rounded-xl bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
+              className="
+                flex-1
+                rounded-xl
+                bg-zinc-900
+                px-4
+                py-3
+                text-sm
+                font-medium
+                text-white
+                transition
+
+                hover:bg-zinc-800
+
+                disabled:opacity-50
+              "
             >
+
               <ReceiptText
                 size={15}
-                className="mr-2 inline"
+                className="mr-1.5 inline"
               />
+
 
               {loading
                 ? "Adding..."
                 : "Add Expense"}
+
             </button>
 
           </div>
 
         </form>
+
       </Modal>
 
     </>
