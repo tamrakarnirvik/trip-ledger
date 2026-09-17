@@ -442,306 +442,164 @@ export function TripActions({
           Desktop = original button row
       ================================= */}
 
-      <motion.div
-        initial={{
-          opacity: 0,
-          y: 10,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-        }}
-        transition={{
-          delay: 0.1,
-          duration: 0.4,
-          ease: [
-            0.22,
-            1,
-            0.36,
-            1,
-          ],
-        }}
-        className="
-          fixed
-          inset-x-0
-          bottom-0
-          z-50
+      {/* ACTION BUTTONS */}
 
-          border-t
-          border-zinc-200
-          bg-white/95
+<motion.div
+    initial={{
+      opacity: 0,
+      y: 10,
+    }}
+    animate={{
+      opacity: 1,
+      y: 0,
+    }}
+    transition={{
+      delay: 0.1,
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1],
+    }}
+    className="hidden md:flex md:flex-wrap md:gap-2"
+  >
+    <button
+      type="button"
+      onClick={() =>
+        openModal("member")
+      }
+      className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98]"
+    >
+      <UserPlus
+        size={16}
+        strokeWidth={1.8}
+      />
+      Add Member
+    </button>
 
-          px-2
-          pt-2
-          pb-[calc(env(safe-area-inset-bottom)+0.55rem)]
+    <button
+      type="button"
+      onClick={() =>
+        openModal("payment")
+      }
+      disabled={members.length === 0}
+      className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <Banknote
+        size={16}
+        strokeWidth={1.8}
+      />
+      Record Payment
+    </button>
 
-          shadow-[0_-8px_25px_rgba(0,0,0,0.06)]
-          backdrop-blur-xl
+    <button
+      type="button"
+      onClick={() =>
+        openModal("expense")
+      }
+      className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 active:scale-[0.98]"
+    >
+      <Plus
+        size={16}
+        strokeWidth={1.8}
+      />
+      Add Expense
+    </button>
 
-          md:static
-          md:z-auto
-          md:border-0
-          md:bg-transparent
-          md:p-0
-          md:shadow-none
-          md:backdrop-blur-none
-        "
-      >
+    <Link
+      href="/report"
+      className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98]"
+    >
+      <FileText
+        size={16}
+        strokeWidth={1.8}
+      />
+      Report
+    </Link>
+  </motion.div>
 
-        <div
-          className="
-            mx-auto
-            grid
-            w-full
-            max-w-md
-            grid-cols-4
-            gap-1
-
-            md:mx-0
-            md:flex
-            md:max-w-none
-            md:flex-wrap
-            md:gap-2
-          "
+  {/* MOBILE BOTTOM NAV */}
+  <motion.div
+    initial={{
+      opacity: 0,
+      y: 16,
+    }}
+    animate={{
+      opacity: 1,
+      y: 0,
+    }}
+    transition={{
+      delay: 0.12,
+      duration: 0.42,
+      ease: [0.22, 1, 0.36, 1],
+    }}
+    className="fixed inset-x-0 bottom-4 z-50 px-4 md:hidden"
+  >
+    <div className="mx-auto max-w-md rounded-[34px] border border-zinc-200/80 bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.8rem)] pt-4 shadow-[0_18px_50px_rgba(0,0,0,0.10)] backdrop-blur-xl">
+      <div className="grid grid-cols-[1fr_1fr_auto_1fr] items-end gap-2">
+        <button
+          type="button"
+          onClick={() =>
+            openModal("member")
+          }
+          className="flex min-w-0 flex-col items-center justify-center gap-2 rounded-2xl px-2 py-2 text-zinc-500 transition hover:bg-zinc-50 active:scale-[0.97]"
         >
+          <UserPlus
+            size={22}
+            strokeWidth={1.8}
+          />
+          <span className="text-[11px] font-medium leading-none">
+            Members
+          </span>
+        </button>
 
-          {/* ADD MEMBER */}
+        <button
+          type="button"
+          onClick={() =>
+            openModal("payment")
+          }
+          disabled={members.length === 0}
+          className="flex min-w-0 flex-col items-center justify-center gap-2 rounded-2xl px-2 py-2 text-zinc-500 transition hover:bg-zinc-50 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <Banknote
+            size={22}
+            strokeWidth={1.8}
+          />
+          <span className="text-[11px] font-medium leading-none">
+            Record
+          </span>
+        </button>
 
-          <button
-            type="button"
-            onClick={() =>
-              openModal(
-                "member"
-              )
-            }
-            className="
-              flex
-              h-14
-              min-w-0
-              flex-col
-              items-center
-              justify-center
-              gap-1
-              rounded-xl
-              px-1
-              text-[10px]
-              font-medium
-              leading-tight
-              text-zinc-600
-              transition
-
-              hover:bg-zinc-100
-              active:scale-[0.97]
-
-              md:inline-flex
-              md:h-auto
-              md:min-h-10
-              md:flex-row
-              md:gap-2
-              md:rounded-xl
-              md:border
-              md:border-zinc-200
-              md:bg-white
-              md:px-4
-              md:py-2.5
-              md:text-sm
-              md:font-medium
-              md:text-zinc-700
-
-              md:hover:border-zinc-300
-              md:hover:bg-zinc-50
-              md:active:scale-[0.98]
-            "
-          >
-            <UserPlus
-              size={18}
-              strokeWidth={1.8}
-              className="shrink-0 md:h-4 md:w-4"
-            />
-
-            <span className="text-center">
-              Add Member
-            </span>
-          </button>
-
-
-          {/* RECORD PAYMENT */}
-
-          <button
-            type="button"
-            onClick={() =>
-              openModal(
-                "payment"
-              )
-            }
-            disabled={
-              members.length ===
-              0
-            }
-            className="
-              flex
-              h-14
-              min-w-0
-              flex-col
-              items-center
-              justify-center
-              gap-1
-              rounded-xl
-              px-1
-              text-[10px]
-              font-medium
-              leading-tight
-              text-zinc-600
-              transition
-
-              hover:bg-zinc-100
-              active:scale-[0.97]
-
-              disabled:cursor-not-allowed
-              disabled:opacity-40
-
-              md:inline-flex
-              md:h-auto
-              md:min-h-10
-              md:flex-row
-              md:gap-2
-              md:rounded-xl
-              md:border
-              md:border-zinc-200
-              md:bg-white
-              md:px-4
-              md:py-2.5
-              md:text-sm
-              md:font-medium
-              md:text-zinc-700
-
-              md:hover:border-zinc-300
-              md:hover:bg-zinc-50
-              md:active:scale-[0.98]
-            "
-          >
-            <Banknote
-              size={18}
-              strokeWidth={1.8}
-              className="shrink-0 md:h-4 md:w-4"
-            />
-
-            <span className="text-center">
-              Record Payment
-            </span>
-          </button>
-
-
-          {/* ADD EXPENSE */}
-
-          <button
-            type="button"
-            onClick={() =>
-              openModal(
-                "expense"
-              )
-            }
-            className="
-              flex
-              h-14
-              min-w-0
-              flex-col
-              items-center
-              justify-center
-              gap-1
-              rounded-xl
-              bg-zinc-900
-              px-1
-              text-[10px]
-              font-medium
-              leading-tight
-              text-white
-              transition
-
-              hover:bg-zinc-800
-              active:scale-[0.97]
-
-              md:inline-flex
-              md:h-auto
-              md:min-h-10
-              md:flex-row
-              md:gap-2
-              md:px-4
-              md:py-2.5
-              md:text-sm
-              md:font-medium
-              md:active:scale-[0.98]
-            "
-          >
+        <button
+          type="button"
+          onClick={() =>
+            openModal("expense")
+          }
+          className="-mt-10 flex h-24 w-24 items-center justify-center self-start rounded-full bg-zinc-950 text-white shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition hover:bg-zinc-800 active:scale-[0.97]"
+        >
+          <div className="flex flex-col items-center gap-2">
             <Plus
-              size={18}
-              strokeWidth={1.8}
-              className="shrink-0 md:h-4 md:w-4"
+              size={28}
+              strokeWidth={2}
             />
-
-            <span className="text-center">
+            <span className="text-[11px] font-medium leading-none">
               Add Expense
             </span>
-          </button>
+          </div>
+        </button>
 
-
-          {/* REPORT */}
-
-          <Link
-            href="/report"
-            className="
-              flex
-              h-14
-              min-w-0
-              flex-col
-              items-center
-              justify-center
-              gap-1
-              rounded-xl
-              px-1
-              text-[10px]
-              font-medium
-              leading-tight
-              text-zinc-600
-              transition
-
-              hover:bg-zinc-100
-              active:scale-[0.97]
-
-              md:inline-flex
-              md:h-auto
-              md:min-h-10
-              md:flex-row
-              md:gap-2
-              md:rounded-xl
-              md:border
-              md:border-zinc-200
-              md:bg-white
-              md:px-4
-              md:py-2.5
-              md:text-sm
-              md:font-medium
-              md:text-zinc-700
-
-              md:hover:border-zinc-300
-              md:hover:bg-zinc-50
-              md:active:scale-[0.98]
-            "
-          >
-            <FileText
-              size={18}
-              strokeWidth={1.8}
-              className="shrink-0 md:h-4 md:w-4"
-            />
-
-            <span className="text-center">
-              Report
-            </span>
-          </Link>
-
-        </div>
-
-      </motion.div>
+        <Link
+          href="/report"
+          className="flex min-w-0 flex-col items-center justify-center gap-2 rounded-2xl px-2 py-2 text-zinc-500 transition hover:bg-zinc-50 active:scale-[0.97]"
+        >
+          <FileText
+            size={22}
+            strokeWidth={1.8}
+          />
+          <span className="text-[11px] font-medium leading-none">
+            Report
+          </span>
+        </Link>
+      </div>
+    </div>
+  </motion.div>
 
 
       {/* =================================

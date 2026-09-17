@@ -12,6 +12,7 @@ import {
   MoreHorizontal,
   RotateCcw,
   Trash2,
+  UsersRound,
 } from "lucide-react";
 
 import {
@@ -31,11 +32,13 @@ import type {
   Member,
 } from "@/types/trip";
 
+
 type MembersListProps = {
   members: Member[];
   contributionPerPerson: number;
   canManage: boolean;
 };
+
 
 export function MembersList({
   members,
@@ -45,6 +48,7 @@ export function MembersList({
   const router =
     useRouter();
 
+
   const [
     selectedMemberId,
     setSelectedMemberId,
@@ -53,17 +57,20 @@ export function MembersList({
       null
     );
 
+
   const [
     loading,
     setLoading,
   ] =
     useState(false);
 
+
   const [
     error,
     setError,
   ] =
     useState("");
+
 
   const selectedMember =
     members.find(
@@ -72,29 +79,36 @@ export function MembersList({
         selectedMemberId
     ) ?? null;
 
+
   async function handleEdit(
     event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
+
     if (!selectedMember) {
       return;
     }
 
+
     const form =
       event.currentTarget;
 
+
     const formData =
       new FormData(form);
+
 
     const name =
       String(
         formData.get("name") ?? ""
       ).trim();
 
+
     try {
       setLoading(true);
       setError("");
+
 
       const response =
         await fetch(
@@ -113,10 +127,12 @@ export function MembersList({
           }
         );
 
+
       const data =
         await response
           .json()
           .catch(() => null);
+
 
       if (!response.ok) {
         throw new Error(
@@ -124,6 +140,7 @@ export function MembersList({
             "Unable to update member."
         );
       }
+
 
       router.refresh();
     } catch (error) {
@@ -137,22 +154,27 @@ export function MembersList({
     }
   }
 
+
   async function handleDeleteMember() {
     if (!selectedMember) {
       return;
     }
+
 
     const confirmed =
       window.confirm(
         `Delete ${selectedMember.name} and all of their payment records?`
       );
 
+
     if (!confirmed) {
       return;
     }
 
+
     try {
       setLoading(true);
+
 
       const response =
         await fetch(
@@ -162,10 +184,12 @@ export function MembersList({
           }
         );
 
+
       const data =
         await response
           .json()
           .catch(() => null);
+
 
       if (!response.ok) {
         throw new Error(
@@ -174,9 +198,11 @@ export function MembersList({
         );
       }
 
+
       setSelectedMemberId(
         null
       );
+
 
       router.refresh();
     } catch (error) {
@@ -190,6 +216,7 @@ export function MembersList({
     }
   }
 
+
   async function handleDeletePayment(
     contributionId: string,
     amount: number
@@ -201,12 +228,15 @@ export function MembersList({
         )}?`
       );
 
+
     if (!confirmed) {
       return;
     }
 
+
     try {
       setLoading(true);
+
 
       const response =
         await fetch(
@@ -216,10 +246,12 @@ export function MembersList({
           }
         );
 
+
       const data =
         await response
           .json()
           .catch(() => null);
+
 
       if (!response.ok) {
         throw new Error(
@@ -227,6 +259,7 @@ export function MembersList({
             "Unable to reverse payment."
         );
       }
+
 
       router.refresh();
     } catch (error) {
@@ -240,20 +273,37 @@ export function MembersList({
     }
   }
 
+
+  function openMember(
+    memberId: string
+  ) {
+    setError("");
+
+    setSelectedMemberId(
+      memberId
+    );
+  }
+
+
   return (
     <>
+
+      {/* =================================
+          MEMBERS SECTION
+      ================================= */}
+
       <motion.section
         initial={{
           opacity: 0,
-          y: 20,
+          y: 16,
         }}
         animate={{
           opacity: 1,
           y: 0,
         }}
         transition={{
-          duration: 0.5,
-          delay: 0.38,
+          duration: 0.45,
+          delay: 0.34,
           ease: [
             0.22,
             1,
@@ -261,34 +311,312 @@ export function MembersList({
             1,
           ],
         }}
-        className="overflow-hidden rounded-3xl border border-zinc-200 bg-white"
+        className="
+          overflow-hidden
+          rounded-[24px]
+          border
+          border-zinc-200
+          bg-white
+          shadow-sm
+        "
       >
-        <div className="border-b border-zinc-100 p-5 sm:p-6">
 
-          <div className="flex items-center justify-between gap-4">
+        {/* HEADER */}
 
-            <div>
+        <div className="flex items-center justify-between gap-4 px-5 py-5 sm:px-6">
+
+          <div className="flex min-w-0 items-center gap-3">
+
+            {/* ICON */}
+
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-700">
+              <UsersRound
+                size={18}
+                strokeWidth={1.8}
+              />
+            </div>
+
+
+            {/* TITLE */}
+
+            <div className="min-w-0">
+
               <h2 className="text-base font-semibold text-zinc-950">
                 Members
               </h2>
 
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-0.5 hidden text-xs text-zinc-500 sm:block">
                 Contribution status for everyone.
               </p>
+
             </div>
 
-            <span className="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-600">
-              {members.length} members
-            </span>
+          </div>
+
+
+          {/* MEMBER COUNT */}
+
+          <span className="shrink-0 rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-600">
+            {members.length} members
+          </span>
+
+        </div>
+
+
+        {/* =================================
+            DESKTOP TABLE
+        ================================= */}
+
+        <div className="hidden px-5 pb-5 md:block sm:px-6">
+
+          <div className="overflow-hidden rounded-xl border border-zinc-100">
+
+            <table className="w-full table-fixed border-collapse">
+
+              {/* TABLE HEADER */}
+
+              <thead className="bg-zinc-50">
+
+                <tr className="text-left">
+
+                  <th className="w-[6%] px-3 py-3 text-xs font-medium text-zinc-500">
+                    #
+                  </th>
+
+                  <th className="w-[24%] px-3 py-3 text-xs font-medium text-zinc-500">
+                    Member
+                  </th>
+
+                  <th className="w-[25%] px-3 py-3 text-xs font-medium text-zinc-500">
+                    Contribution
+                  </th>
+
+                  <th className="w-[16%] px-3 py-3 text-xs font-medium text-zinc-500">
+                    Status
+                  </th>
+
+                  <th className="w-[19%] px-3 py-3 text-xs font-medium text-zinc-500">
+                    Remaining
+                  </th>
+
+                  <th className="w-[10%] px-3 py-3 text-right text-xs font-medium text-zinc-500">
+                    Actions
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              {/* TABLE BODY */}
+
+              <tbody className="divide-y divide-zinc-100">
+
+                {members.map(
+                  (
+                    member,
+                    index
+                  ) => {
+                    const remaining =
+                      Math.max(
+                        contributionPerPerson -
+                          member.amountPaid,
+                        0
+                      );
+
+
+                    const isPaid =
+                      member.amountPaid >=
+                      contributionPerPerson;
+
+
+                    const isPartial =
+                      member.amountPaid >
+                        0 &&
+                      !isPaid;
+
+
+                    const status =
+                      isPaid
+                        ? "Paid"
+                        : isPartial
+                          ? "Partial"
+                          : "Pending";
+
+
+                    const statusClasses =
+                      isPaid
+                        ? "bg-emerald-50 text-emerald-700"
+                        : isPartial
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-zinc-100 text-zinc-600";
+
+
+                    return (
+                      <tr
+                        key={
+                          member.id
+                        }
+                        className="transition hover:bg-zinc-50/70"
+                      >
+
+                        {/* NUMBER */}
+
+                        <td className="px-3 py-3 text-sm text-zinc-500">
+                          {index + 1}
+                        </td>
+
+
+                        {/* MEMBER */}
+
+                        <td className="px-3 py-3">
+
+                          <div className="flex min-w-0 items-center gap-3">
+
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-50 text-xs font-semibold text-violet-700">
+                              {member.name
+                                .charAt(0)
+                                .toUpperCase()}
+                            </div>
+
+
+                            <p className="truncate text-sm font-medium text-zinc-800">
+                              {
+                                member.name
+                              }
+                            </p>
+
+                          </div>
+
+                        </td>
+
+
+                        {/* CONTRIBUTION */}
+
+                        <td className="px-3 py-3">
+
+                          <p className="whitespace-nowrap text-sm text-zinc-500">
+
+                            {formatMoney(
+                              member.amountPaid
+                            )}
+
+                            {" / "}
+
+                            {formatMoney(
+                              contributionPerPerson
+                            )}
+
+                          </p>
+
+                        </td>
+
+
+                        {/* STATUS */}
+
+                        <td className="px-3 py-3">
+
+                          <span
+                            className={`
+                              inline-flex
+                              rounded-full
+                              px-3
+                              py-1
+                              text-xs
+                              font-medium
+                              ${statusClasses}
+                            `}
+                          >
+                            {status}
+                          </span>
+
+                        </td>
+
+
+                        {/* REMAINING */}
+
+                        <td className="px-3 py-3">
+
+                          <p
+                            className={`whitespace-nowrap text-sm ${
+                              isPaid
+                                ? "text-emerald-700"
+                                : "text-zinc-500"
+                            }`}
+                          >
+                            {isPaid
+                              ? "Completed"
+                              : formatMoney(
+                                  remaining
+                                )}
+                          </p>
+
+                        </td>
+
+
+                        {/* ACTION */}
+
+                        <td className="px-3 py-3 text-right">
+
+                          {canManage ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openMember(
+                                  member.id
+                                )
+                              }
+                              className="
+                                inline-flex
+                                h-8
+                                w-8
+                                items-center
+                                justify-center
+                                rounded-lg
+                                text-zinc-400
+                                transition
+                                hover:bg-zinc-100
+                                hover:text-zinc-950
+                              "
+                              aria-label={`Manage ${member.name}`}
+                            >
+                              <MoreHorizontal
+                                size={17}
+                              />
+                            </button>
+                          ) : (
+                            <span className="text-sm text-zinc-300">
+                              —
+                            </span>
+                          )}
+
+                        </td>
+
+                      </tr>
+                    );
+                  }
+                )}
+
+              </tbody>
+
+            </table>
 
           </div>
 
         </div>
 
-        <div className="divide-y divide-zinc-100">
+
+        {/* =================================
+            MOBILE MEMBER LIST
+        ================================= */}
+
+        <div className="divide-y divide-zinc-100 md:hidden">
 
           {members.map(
-            (member, index) => {
+            (
+              member,
+              index
+            ) => {
               const remaining =
                 Math.max(
                   contributionPerPerson -
@@ -296,13 +624,17 @@ export function MembersList({
                   0
                 );
 
+
               const isPaid =
                 member.amountPaid >=
                 contributionPerPerson;
 
+
               const isPartial =
-                member.amountPaid > 0 &&
+                member.amountPaid >
+                  0 &&
                 !isPaid;
+
 
               const status =
                 isPaid
@@ -311,12 +643,14 @@ export function MembersList({
                     ? "Partial"
                     : "Pending";
 
+
               const statusClasses =
                 isPaid
                   ? "bg-emerald-50 text-emerald-700"
                   : isPartial
                     ? "bg-amber-50 text-amber-700"
                     : "bg-zinc-100 text-zinc-600";
+
 
               return (
                 <motion.div
@@ -325,97 +659,110 @@ export function MembersList({
                   }
                   initial={{
                     opacity: 0,
-                    x: -10,
+                    x: -8,
                   }}
                   animate={{
                     opacity: 1,
                     x: 0,
                   }}
                   transition={{
-                    duration:
-                      0.32,
-
+                    duration: 0.3,
                     delay:
-                      0.45 +
+                      0.38 +
                       index *
-                        0.04,
+                        0.035,
                   }}
-                  className="flex items-center gap-4 px-5 py-4 transition hover:bg-zinc-50 sm:px-6"
+                  className="px-5 py-4"
                 >
 
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold text-zinc-700">
+                  {/* TOP ROW */}
 
-                    {member.name
-                      .charAt(0)
-                      .toUpperCase()}
+                  <div className="flex items-center gap-3">
 
-                  </div>
+                    {/* AVATAR */}
 
-                  <div className="min-w-0 flex-1">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-semibold text-violet-700">
+                      {member.name
+                        .charAt(0)
+                        .toUpperCase()}
+                    </div>
 
-                    <p className="truncate text-sm font-medium text-zinc-950">
-                      {
-                        member.name
-                      }
-                    </p>
 
-                    <p className="mt-1 text-xs text-zinc-500">
+                    {/* NAME */}
 
-                      {formatMoney(
-                        member.amountPaid
-                      )}
+                    <div className="min-w-0 flex-1">
 
-                      {" / "}
+                      <p className="truncate text-sm font-medium text-zinc-900">
+                        {
+                          member.name
+                        }
+                      </p>
 
-                      {formatMoney(
-                        contributionPerPerson
-                      )}
-
-                    </p>
-
-                  </div>
-
-                  <div className="flex items-center gap-2">
-
-                    <div className="hidden flex-col items-end gap-1 sm:flex">
-
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClasses}`}
-                      >
-                        {status}
-                      </span>
-
-                      {!isPaid &&
-                        member.amountPaid >
-                          0 && (
-                          <span className="text-[11px] text-zinc-400">
-                            {formatMoney(
-                              remaining
-                            )}{" "}
-                            left
-                          </span>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {formatMoney(
+                          member.amountPaid
                         )}
+                        {" / "}
+                        {formatMoney(
+                          contributionPerPerson
+                        )}
+                      </p>
 
                     </div>
 
-                    {canManage && (
-  <button
-    type="button"
-    onClick={() => {
-      setError("");
 
-      setSelectedMemberId(
-        member.id
-      );
-    }}
-    className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-white hover:text-zinc-950"
-    aria-label={`Manage ${member.name}`}
-  >
-    <MoreHorizontal
-      size={18}
-    />
-  </button>
-)}
+                    {/* STATUS */}
+
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${statusClasses}`}
+                    >
+                      {status}
+                    </span>
+
+
+                    {/* ACTION */}
+
+                    {canManage && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openMember(
+                            member.id
+                          )
+                        }
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-950"
+                        aria-label={`Manage ${member.name}`}
+                      >
+                        <MoreHorizontal
+                          size={17}
+                        />
+                      </button>
+                    )}
+
+                  </div>
+
+
+                  {/* REMAINING */}
+
+                  <div className="mt-3 flex items-center justify-between pl-[52px]">
+
+                    <span className="text-[11px] text-zinc-400">
+                      Remaining
+                    </span>
+
+                    <span
+                      className={`text-xs font-medium ${
+                        isPaid
+                          ? "text-emerald-700"
+                          : "text-zinc-600"
+                      }`}
+                    >
+                      {isPaid
+                        ? "Completed"
+                        : formatMoney(
+                            remaining
+                          )}
+                    </span>
 
                   </div>
 
@@ -425,7 +772,13 @@ export function MembersList({
           )}
 
         </div>
+
       </motion.section>
+
+
+      {/* =================================
+          MEMBER MANAGEMENT MODAL
+      ================================= */}
 
       <Modal
         open={
@@ -448,6 +801,7 @@ export function MembersList({
 
         {selectedMember && (
           <>
+
             {/* CONTRIBUTION STATUS */}
 
             <div className="rounded-2xl bg-zinc-50 p-4">
@@ -455,6 +809,7 @@ export function MembersList({
               <p className="text-xs font-medium text-zinc-500">
                 Total paid
               </p>
+
 
               <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-950">
 
@@ -471,6 +826,7 @@ export function MembersList({
                 </span>
 
               </p>
+
 
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-zinc-200">
 
@@ -490,6 +846,7 @@ export function MembersList({
 
               </div>
 
+
               <p className="mt-3 text-xs text-zinc-500">
 
                 {selectedMember.amountPaid >=
@@ -504,6 +861,7 @@ export function MembersList({
 
             </div>
 
+
             {/* PAYMENT HISTORY */}
 
             <div className="mt-6">
@@ -511,6 +869,7 @@ export function MembersList({
               <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
                 Payment History
               </h3>
+
 
               {selectedMember
                 .contributions
@@ -554,6 +913,7 @@ export function MembersList({
 
                           </div>
 
+
                           <button
                             type="button"
                             disabled={
@@ -586,6 +946,7 @@ export function MembersList({
 
             </div>
 
+
             {/* EDIT MEMBER */}
 
             <form
@@ -599,12 +960,14 @@ export function MembersList({
                 Edit Member
               </h3>
 
+
               <label
                 htmlFor="edit-member-name"
                 className="mt-3 block text-xs font-medium text-zinc-600"
               >
                 Name
               </label>
+
 
               <input
                 id="edit-member-name"
@@ -617,11 +980,13 @@ export function MembersList({
                 required
               />
 
+
               {error && (
                 <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
                   {error}
                 </p>
               )}
+
 
               <button
                 type="submit"
@@ -636,6 +1001,7 @@ export function MembersList({
               </button>
 
             </form>
+
 
             {/* DELETE MEMBER */}
 
@@ -660,6 +1026,7 @@ export function MembersList({
                 Delete Member
               </button>
 
+
               <p className="mt-2 text-center text-[11px] leading-4 text-zinc-400">
                 This also removes the member&apos;s payment history.
               </p>
@@ -670,6 +1037,7 @@ export function MembersList({
         )}
 
       </Modal>
+
     </>
   );
 }

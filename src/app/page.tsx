@@ -2,6 +2,7 @@ import * as motion from "motion/react-client";
 
 import {
   Banknote,
+  Bell,
   ReceiptText,
   UsersRound,
   Wallet,
@@ -61,6 +62,10 @@ import type {
   ExpenseCategory,
 } from "@/types/trip";
 
+import {
+  AppSidebar,
+} from "@/components/layout/app-sidebar";
+
 
 export const dynamic =
   "force-dynamic";
@@ -84,6 +89,12 @@ export default async function Home() {
   const isTreasurer =
   session.user.role ===
   "TREASURER";
+  const displayName =
+  session.user.name?.trim() ||
+  "Trip User";
+
+const userInitial =
+  displayName.charAt(0).toUpperCase();
 
 
   /*
@@ -283,128 +294,177 @@ export default async function Home() {
    */
 
   return (
-    <main className="min-h-screen bg-[#f7f7f8] pb-24 text-zinc-950 md:pb-0">
+  <main className="min-h-screen bg-[#f7f7f8] pb-36 text-zinc-950 md:pb-0">
 
-      <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
+    <AppSidebar
+      tripName={trip.name}
+    />
+
+    <div
+  className="
+    mx-auto
+    max-w-[1600px]
+    px-4
+    pt-4
+    pb-7
+
+    sm:px-6
+    sm:pt-5
+    sm:pb-8
+
+    lg:ml-[220px]
+    lg:px-10
+    lg:pt-5
+  "
+>
 
         {/* HEADER */}
 
         <motion.header
-          initial={{
-            opacity: 0,
-            y: -12,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          transition={{
-            duration: 0.5,
+  initial={{
+    opacity: 0,
+    y: -10,
+  }}
+  animate={{
+    opacity: 1,
+    y: 0,
+  }}
+  transition={{
+    duration: 0.45,
+    ease: [0.22, 1, 0.36, 1],
+  }}
+  className="mb-5"
+>
+  <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
 
-            ease: [
-              0.22,
-              1,
-              0.36,
-              1,
-            ],
-          }}
-          className="mb-8"
+    {/* LEFT SIDE */}
+
+    <div className="pt-1">
+      <div className="mb-1.5 flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-zinc-950" />
+
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
+          Trip Ledger
+        </p>
+      </div>
+
+      <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl">
+        {trip.name}
+      </h1>
+
+      <p className="mt-1.5 text-sm text-zinc-500">
+        Manage contributions and trip expenses in one place.
+      </p>
+    </div>
+
+
+    {/* RIGHT SIDE */}
+
+    <div className="flex flex-col gap-2.5 xl:items-end">
+
+      {/* TOP USER ROW */}
+
+      <div className="flex flex-wrap items-center gap-2.5 xl:justify-end">
+
+        {/* BELL */}
+
+        <button
+          type="button"
+          className="relative flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-sm transition hover:bg-zinc-50"
+          aria-label="Notifications"
         >
+          <Bell
+            size={16}
+            strokeWidth={1.9}
+          />
 
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+        </button>
 
-            {/* LEFT SIDE */}
+        {/* USER CHIP */}
 
-            <div>
-
-              <div className="mb-3 flex items-center gap-2">
-
-                <div className="h-2 w-2 rounded-full bg-zinc-900" />
-
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                  Trip Ledger
-                </p>
-
-              </div>
-
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                {trip.name}
-              </h1>
-
-              <p className="mt-2 text-sm text-zinc-500">
-                Manage contributions and trip
-                expenses in one place.
-              </p>
-
-            </div>
-
-
-            {/* RIGHT SIDE */}
-
-            <div className="flex flex-wrap items-center gap-2">
-
-  {/* MEMBER INFO */}
-
-  <div className="flex w-fit items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-600">
-
-    <UsersRound
-      size={16}
-    />
-
-    <span>
-      {members.length} members
-    </span>
-
-    <span className="text-zinc-300">
-      ·
-    </span>
-
-    <span>
-      {formatMoney(
-        trip.contributionPerPerson
-      )}{" "}
-      each
-    </span>
-
-  </div>
-
-
-  {/* ROLE BADGE */}
-
-  <span
-    className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-      isTreasurer
-        ? "bg-zinc-900 text-white"
-        : "bg-zinc-100 text-zinc-600"
-    }`}
-  >
-    {isTreasurer
-      ? "Treasurer"
-      : "Friend"}
-  </span>
-
-
-  {/* LOGOUT */}
-
-  <LogoutButton
-    name={
-      session.user.name
-    }
-  />
-
-</div>
-
+        <div className="flex items-center gap-2.5 rounded-full border border-zinc-200 bg-white px-2.5 py-2 pr-4 shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 text-sm font-semibold text-zinc-700">
+            {userInitial}
           </div>
 
-        </motion.header>
+          <span className="text-sm font-medium text-zinc-700">
+            {displayName}
+          </span>
+        </div>
 
+      </div>
+
+
+      {/* SECOND ROW */}
+
+      <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+
+        {/* MEMBERS / PER HEAD */}
+
+        <div className="flex items-center gap-2.5 rounded-full border border-zinc-200 bg-white px-3.5 py-2 text-sm text-zinc-600 shadow-sm">
+          <UsersRound
+            size={15}
+            strokeWidth={1.9}
+          />
+
+          <span>
+            {members.length} members
+          </span>
+
+          <span className="text-zinc-300">
+            |
+          </span>
+
+          <span>
+            {formatMoney(
+              trip.contributionPerPerson
+            )}{" "}
+            each
+          </span>
+        </div>
+
+
+        {/* ROLE + NAME */}
+
+        <div className="flex items-center overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm">
+          <span
+            className={`px-3.5 py-2 text-sm font-medium ${
+              isTreasurer
+                ? "bg-zinc-950 text-white"
+                : "bg-zinc-100 text-zinc-600"
+            }`}
+          >
+            {isTreasurer
+              ? "Treasurer"
+              : "Friend"}
+          </span>
+
+          <span className="px-3.5 py-2 text-sm font-medium text-zinc-700">
+            {displayName}
+          </span>
+        </div>
+
+
+        {/* LOGOUT */}
+
+        <LogoutButton
+          name={null}
+        />
+
+      </div>
+
+    </div>
+
+  </div>
+</motion.header>
 
         {/* ACTION BUTTONS */}
 
         {/* TREASURER ACTIONS */}
 
 {isTreasurer ? (
-  <div className="mb-6 flex flex-wrap items-start gap-2">
+  <div className="mb-4 flex flex-wrap items-start gap-2">
 
     <TripActions
       tripId={trip.id}
@@ -414,14 +474,14 @@ export default async function Home() {
       }
     />
 
-    <TripSettings
-      tripId={
-        trip.id
-      }
-      contributionPerPerson={
-        trip.contributionPerPerson
-      }
-    />
+    <div id="trip-settings">
+      <TripSettings
+        tripId={trip.id}
+        contributionPerPerson={
+          trip.contributionPerPerson
+        }
+      />
+    </div>
 
   </div>
 ) : (
@@ -444,7 +504,7 @@ export default async function Home() {
 
         {/* SUMMARY CARDS */}
 
-        <section className="grid gap-3 sm:grid-cols-2 lg:gap-4 xl:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
           <StatCard
             title="Expected Fund"
@@ -519,64 +579,104 @@ export default async function Home() {
         </section>
 
 
-        {/* CONTRIBUTION PROGRESS */}
+        {/* =================================
+    DASHBOARD CONTENT
+================================= */}
 
-        <div className="mt-4">
+<div
+  className="
+    mt-4
+    grid
+    items-start
+    gap-4
 
-          <ContributionProgress
-            collected={
-              collectedMoney
-            }
-            expected={
-              expectedFund
-            }
-            fullyPaidMembers={
-              fullyPaidMembers
-            }
-            totalMembers={
-              members.length
-            }
-          />
+    xl:grid-cols-[1.65fr_0.95fr]
+  "
+>
 
-        </div>
+  {/* CONTRIBUTION PROGRESS */}
 
-
-        {/* MEMBERS + EXPENSES */}
-
-        <div className="mt-4 grid items-start gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-
-          <MembersList
-  members={members}
-  contributionPerPerson={
-    trip.contributionPerPerson
-  }
-  canManage={
-    isTreasurer
-  }
-/>
+  <div>
+    <ContributionProgress
+      collected={
+        collectedMoney
+      }
+      expected={
+        expectedFund
+      }
+      fullyPaidMembers={
+        fullyPaidMembers
+      }
+      totalMembers={
+        members.length
+      }
+    />
+  </div>
 
 
-          <ExpenseList
-  expenses={expenses}
-  canManage={
-    isTreasurer
-  }
-/>
+  {/* RECENT EXPENSES */}
 
-        </div>
+  <div
+    id="expenses"
+    className="scroll-mt-6"
+  >
+    <ExpenseList
+      expenses={
+        expenses
+      }
+      canManage={
+        isTreasurer
+      }
+    />
+  </div>
+
+</div>
 
 
-        {/* EXPENSE CATEGORY SUMMARY */}
+{/* SECOND DASHBOARD ROW */}
 
-        <div className="mt-4">
+<div
+  className="
+    mt-4
+    grid
+    items-start
+    gap-4
 
-          <ExpenseSummary
-            expenses={
-              expenses
-            }
-          />
+    xl:grid-cols-[1.65fr_0.95fr]
+  "
+>
 
-        </div>
+  {/* MEMBERS */}
+
+  <div
+    id="members"
+    className="scroll-mt-6"
+  >
+    <MembersList
+      members={
+        members
+      }
+      contributionPerPerson={
+        trip.contributionPerPerson
+      }
+      canManage={
+        isTreasurer
+      }
+    />
+  </div>
+
+
+  {/* EXPENSE BREAKDOWN */}
+
+  <div>
+    <ExpenseSummary
+      expenses={
+        expenses
+      }
+    />
+  </div>
+
+</div>
 
 
         {/* FOOTER */}

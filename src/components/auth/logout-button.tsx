@@ -67,7 +67,7 @@ export function LogoutButton({
         type="button"
         onClick={handleLogout}
         disabled={loading}
-        className="flex h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex h-10 items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-3.5 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-[0.98] disabled:opacity-50"
       >
         <LogOut
           size={16}

@@ -1,5 +1,13 @@
-import type { ReactNode } from "react";
-import * as motion from "motion/react-client";
+"use client";
+
+import type {
+  ReactNode,
+} from "react";
+
+import {
+  motion,
+} from "motion/react";
+
 
 type StatCardProps = {
   title: string;
@@ -9,6 +17,7 @@ type StatCardProps = {
   highlight?: boolean;
   delay?: number;
 };
+
 
 export function StatCard({
   title,
@@ -22,74 +31,89 @@ export function StatCard({
     <motion.div
       initial={{
         opacity: 0,
-        y: 18,
-        scale: 0.98,
+        y: 10,
       }}
       animate={{
         opacity: 1,
         y: 0,
-        scale: 1,
       }}
       transition={{
-        duration: 0.45,
         delay,
-        ease: [0.22, 1, 0.36, 1],
+        duration: 0.4,
+        ease: [
+          0.22,
+          1,
+          0.36,
+          1,
+        ],
       }}
-      whileHover={{
-        y: -3,
-        transition: {
-          duration: 0.18,
-        },
-      }}
-      className={`rounded-3xl border p-5 ${
+      className={[
+        "rounded-[24px] border p-5 shadow-sm transition",
         highlight
-          ? "border-zinc-900 bg-zinc-900 text-white"
-          : "border-zinc-200 bg-white text-zinc-950"
-      }`}
+          ? "border-zinc-900 bg-zinc-950 text-white"
+          : "border-zinc-200 bg-white text-zinc-950",
+      ].join(" ")}
     >
       <div className="flex items-start justify-between gap-4">
-        <p
-          className={`text-sm font-medium ${
-            highlight
-              ? "text-zinc-400"
-              : "text-zinc-500"
-          }`}
-        >
-          {title}
-        </p>
 
-        <motion.div
-          whileHover={{
-            rotate: 4,
-            scale: 1.05,
-          }}
-          transition={{
-            duration: 0.2,
-          }}
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+        {/* TEXT */}
+
+        <div className="min-w-0">
+
+          <p
+            className={[
+              "text-sm font-medium",
+              highlight
+                ? "text-zinc-300"
+                : "text-zinc-500",
+            ].join(" ")}
+          >
+            {title}
+          </p>
+
+
+          <h3
+            className="
+              mt-4
+              text-[1.75rem]
+              font-semibold
+              leading-tight
+              tracking-tight
+
+              lg:text-[1.9rem]
+            "
+          >
+            {value}
+          </h3>
+
+
+          <p
+            className={[
+              "mt-2 text-xs leading-5",
+              highlight
+                ? "text-zinc-400"
+                : "text-zinc-500",
+            ].join(" ")}
+          >
+            {description}
+          </p>
+
+        </div>
+
+
+        {/* ICON */}
+
+        <div
+          className={[
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
             highlight
               ? "bg-white/10 text-white"
-              : "bg-zinc-100 text-zinc-700"
-          }`}
+              : "bg-zinc-50 text-zinc-500",
+          ].join(" ")}
         >
           {icon}
-        </motion.div>
-      </div>
+        </div>
 
-      <div className="mt-7">
-        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {value}
-        </h2>
-
-        <p
-          className={`mt-2 text-xs ${
-            highlight
-              ? "text-zinc-400"
-              : "text-zinc-500"
-          }`}
-        >
-          {description}
-        </p>
       </div>
     </motion.div>
   );
