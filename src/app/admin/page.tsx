@@ -28,6 +28,10 @@ import {
   getCurrentSession,
 } from "@/lib/session";
 
+import {
+  AdminSectionNav,
+} from "@/components/admin/admin-section-nav";
+
 import prisma from "@/lib/prisma";
 
 
@@ -326,6 +330,7 @@ export default async function AdminPage() {
           </Link>
 
         </header>
+        <AdminSectionNav />
 
 
         {/* =========================
