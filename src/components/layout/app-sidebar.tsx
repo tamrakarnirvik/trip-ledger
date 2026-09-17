@@ -13,6 +13,7 @@ import {
   Mountain,
   ReceiptText,
   Settings2,
+  ShieldCheck,
   UsersRound,
   Wallet,
 } from "lucide-react";
@@ -37,14 +38,10 @@ type DashboardSection =
 
 type SectionId =
   | DashboardSection
-  | "reports";
+  | "reports"
+  | "admin";
 
 
-/*
- * This component is declared OUTSIDE
- * AppSidebar so React does not recreate
- * it during every render.
- */
 function ActiveIndicator({
   activeSection,
   section,
@@ -52,12 +49,14 @@ function ActiveIndicator({
   activeSection: SectionId;
   section: SectionId;
 }) {
+
   if (
     activeSection !==
     section
   ) {
     return null;
   }
+
 
   return (
     <span
@@ -85,10 +84,6 @@ export function AppSidebar({
     usePathname();
 
 
-  /*
-   * Only stores the section visible
-   * while scrolling on the dashboard.
-   */
   const [
     visibleSection,
     setVisibleSection,
@@ -99,31 +94,30 @@ export function AppSidebar({
 
 
   /*
-   * Reports is determined directly
-   * from the current pathname.
-   *
-   * This avoids calling setState
-   * directly inside useEffect.
+   * Pages like Admin and Reports
+   * are determined from pathname.
    */
   const activeSection: SectionId =
     pathname.startsWith(
-      "/report"
+      "/admin"
     )
-      ? "reports"
-      : visibleSection;
+      ? "admin"
+      : pathname.startsWith(
+            "/report"
+          )
+        ? "reports"
+        : visibleSection;
 
 
   /*
-   * Detect which dashboard section
-   * is currently visible.
+   * Detect active section while
+   * scrolling dashboard.
    */
   useEffect(() => {
 
-    /*
-     * Only use the observer
-     * on the dashboard page.
-     */
-    if (pathname !== "/") {
+    if (
+      pathname !== "/"
+    ) {
       return;
     }
 
@@ -139,10 +133,11 @@ export function AppSidebar({
 
     const sections =
       sectionIds
-        .map((id) =>
-          document.getElementById(
-            id
-          )
+        .map(
+          (id) =>
+            document.getElementById(
+              id
+            )
         )
         .filter(
           (
@@ -188,11 +183,6 @@ export function AppSidebar({
               .id as DashboardSection;
 
 
-          /*
-           * State update happens inside
-           * the observer callback,
-           * which is safe.
-           */
           setVisibleSection(
             sectionId
           );
@@ -201,10 +191,6 @@ export function AppSidebar({
         {
           root: null,
 
-          /*
-           * Defines the area of the screen
-           * used to determine active section.
-           */
           rootMargin:
             "-18% 0px -65% 0px",
 
@@ -236,9 +222,6 @@ export function AppSidebar({
   ]);
 
 
-  /*
-   * Shared sidebar navigation style.
-   */
   function navClasses(
     section: SectionId
   ) {
@@ -254,11 +237,15 @@ export function AppSidebar({
       flex
       items-center
       gap-3
+
       rounded-xl
+
       px-3
       py-2.5
+
       text-sm
       font-medium
+
       transition-all
       duration-200
 
@@ -272,10 +259,6 @@ export function AppSidebar({
   }
 
 
-  /*
-   * Immediately update active state
-   * when dashboard navigation is clicked.
-   */
   function handleDashboardClick(
     section: DashboardSection
   ) {
@@ -311,11 +294,19 @@ export function AppSidebar({
       "
     >
 
-      {/* ===============================
+      {/* ==========================
           LOGO
-      =============================== */}
+      ========================== */}
 
-      <div className="flex items-center gap-3 px-2">
+      <Link
+        href="/"
+        className="
+          flex
+          items-center
+          gap-3
+          px-2
+        "
+      >
 
         <div
           className="
@@ -324,9 +315,12 @@ export function AppSidebar({
             w-9
             items-center
             justify-center
+
             rounded-xl
+
             bg-zinc-900
             text-white
+
             shadow-sm
           "
         >
@@ -350,15 +344,19 @@ export function AppSidebar({
           Trip Ledger
         </span>
 
-      </div>
+      </Link>
 
 
-      {/* ===============================
+      {/* ==========================
           NAVIGATION
-      =============================== */}
+      ========================== */}
 
-      <nav className="mt-8 space-y-1">
-
+      <nav
+        className="
+          mt-8
+          space-y-1
+        "
+      >
 
         {/* DASHBOARD */}
 
@@ -394,9 +392,7 @@ export function AppSidebar({
             }
           />
 
-          <span>
-            Dashboard
-          </span>
+          Dashboard
 
         </Link>
 
@@ -435,9 +431,7 @@ export function AppSidebar({
             }
           />
 
-          <span>
-            Members
-          </span>
+          Members
 
         </Link>
 
@@ -476,9 +470,7 @@ export function AppSidebar({
             }
           />
 
-          <span>
-            Expenses
-          </span>
+          Expenses
 
         </Link>
 
@@ -512,9 +504,7 @@ export function AppSidebar({
             }
           />
 
-          <span>
-            Reports
-          </span>
+          Reports
 
         </Link>
 
@@ -555,34 +545,86 @@ export function AppSidebar({
               }
             />
 
-            <span>
-              Trip Settings
-            </span>
+            Trip Settings
 
           </Link>
+
+        )}
+
+
+        {/* ADMIN */}
+
+        {canManage && (
+
+          <div
+            className="
+              mt-3
+              border-t
+              border-zinc-100
+              pt-3
+            "
+          >
+
+            <Link
+              href="/admin"
+              className={
+                navClasses(
+                  "admin"
+                )
+              }
+            >
+
+              <ActiveIndicator
+                activeSection={
+                  activeSection
+                }
+                section="admin"
+              />
+
+
+              <ShieldCheck
+                size={18}
+                strokeWidth={
+                  activeSection ===
+                  "admin"
+                    ? 2
+                    : 1.7
+                }
+              />
+
+              Admin
+
+            </Link>
+
+          </div>
 
         )}
 
       </nav>
 
 
-      {/* ===============================
+      {/* ==========================
           BOTTOM TRIP CARD
-      =============================== */}
+      ========================== */}
 
-      <div className="mt-auto">
+      <div
+        className="
+          mt-auto
+        "
+      >
 
         <div
           className="
             overflow-hidden
+
             rounded-2xl
+
             border
             border-zinc-200
+
             bg-zinc-50
           "
         >
-
-          {/* TRIP VISUAL */}
 
           <div
             className="
@@ -590,6 +632,7 @@ export function AppSidebar({
               h-20
               items-center
               justify-center
+
               bg-gradient-to-br
               from-zinc-100
               to-zinc-200
@@ -605,9 +648,11 @@ export function AppSidebar({
           </div>
 
 
-          {/* TRIP INFORMATION */}
-
-          <div className="p-4">
+          <div
+            className="
+              p-4
+            "
+          >
 
             <p
               className="
@@ -617,9 +662,7 @@ export function AppSidebar({
                 text-zinc-950
               "
             >
-
               {tripName}
-
             </p>
 
 
