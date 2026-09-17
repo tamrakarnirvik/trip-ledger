@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -32,11 +31,13 @@ import {
   formatMoney,
 } from "@/lib/format";
 
+
 type Member = {
   id: string;
   name: string;
   amountPaid: number;
 };
+
 
 type TripActionsProps = {
   tripId: string;
@@ -44,11 +45,13 @@ type TripActionsProps = {
   contributionPerPerson: number;
 };
 
+
 type ModalType =
   | "member"
   | "payment"
   | "expense"
   | null;
+
 
 function getToday() {
   const today =
@@ -76,6 +79,7 @@ function getToday() {
   return `${year}-${month}-${day}`;
 }
 
+
 export function TripActions({
   tripId,
   members,
@@ -83,6 +87,7 @@ export function TripActions({
 }: TripActionsProps) {
   const router =
     useRouter();
+
 
   const [
     activeModal,
@@ -92,17 +97,20 @@ export function TripActions({
       null
     );
 
+
   const [
     loading,
     setLoading,
   ] =
     useState(false);
 
+
   const [
     error,
     setError,
   ] =
     useState("");
+
 
   const [
     selectedMemberId,
@@ -111,6 +119,7 @@ export function TripActions({
     useState(
       members[0]?.id ?? ""
     );
+
 
   const selectedMember =
     useMemo(
@@ -126,6 +135,7 @@ export function TripActions({
       ]
     );
 
+
   const remaining =
     selectedMember
       ? Math.max(
@@ -135,13 +145,17 @@ export function TripActions({
         )
       : 0;
 
+
   function openModal(
     modal: ModalType
   ) {
     setError("");
 
-    setActiveModal(modal);
+    setActiveModal(
+      modal
+    );
   }
+
 
   function closeModal() {
     if (loading) {
@@ -150,31 +164,42 @@ export function TripActions({
 
     setError("");
 
-    setActiveModal(null);
+    setActiveModal(
+      null
+    );
   }
+
 
   async function sendRequest(
     url: string,
     body: object
   ) {
     const response =
-      await fetch(url, {
-        method: "POST",
+      await fetch(
+        url,
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
 
-        body: JSON.stringify(
-          body
-        ),
-      });
+          body:
+            JSON.stringify(
+              body
+            ),
+        }
+      );
+
 
     const data =
       await response
         .json()
-        .catch(() => null);
+        .catch(
+          () => null
+        );
+
 
     if (!response.ok) {
       throw new Error(
@@ -183,19 +208,27 @@ export function TripActions({
       );
     }
 
+
     return data;
   }
 
+
   async function handleAddMember(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
+
 
     const form =
       event.currentTarget;
 
+
     const formData =
-      new FormData(form);
+      new FormData(
+        form
+      );
+
 
     const name =
       String(
@@ -204,9 +237,11 @@ export function TripActions({
         ) ?? ""
       ).trim();
 
+
     try {
       setLoading(true);
       setError("");
+
 
       await sendRequest(
         "/api/members",
@@ -216,11 +251,14 @@ export function TripActions({
         }
       );
 
+
       form.reset();
+
 
       setActiveModal(
         null
       );
+
 
       router.refresh();
     } catch (error) {
@@ -234,16 +272,23 @@ export function TripActions({
     }
   }
 
+
   async function handlePayment(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
+
 
     const form =
       event.currentTarget;
 
+
     const formData =
-      new FormData(form);
+      new FormData(
+        form
+      );
+
 
     const memberId =
       String(
@@ -252,6 +297,7 @@ export function TripActions({
         ) ?? ""
       );
 
+
     const amount =
       Number(
         formData.get(
@@ -259,9 +305,11 @@ export function TripActions({
         )
       );
 
+
     try {
       setLoading(true);
       setError("");
+
 
       await sendRequest(
         "/api/contributions",
@@ -271,9 +319,11 @@ export function TripActions({
         }
       );
 
+
       setActiveModal(
         null
       );
+
 
       router.refresh();
     } catch (error) {
@@ -287,16 +337,23 @@ export function TripActions({
     }
   }
 
+
   async function handleExpense(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
+
 
     const form =
       event.currentTarget;
 
+
     const formData =
-      new FormData(form);
+      new FormData(
+        form
+      );
+
 
     const title =
       String(
@@ -305,12 +362,14 @@ export function TripActions({
         ) ?? ""
       );
 
+
     const category =
       String(
         formData.get(
           "category"
         ) ?? ""
       );
+
 
     const amount =
       Number(
@@ -319,6 +378,7 @@ export function TripActions({
         )
       );
 
+
     const date =
       String(
         formData.get(
@@ -326,9 +386,11 @@ export function TripActions({
         ) ?? ""
       );
 
+
     try {
       setLoading(true);
       setError("");
+
 
       await sendRequest(
         "/api/expenses",
@@ -341,11 +403,14 @@ export function TripActions({
         }
       );
 
+
       form.reset();
+
 
       setActiveModal(
         null
       );
+
 
       router.refresh();
     } catch (error) {
@@ -359,14 +424,24 @@ export function TripActions({
     }
   }
 
+
   const inputClasses =
     "w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-3 text-sm text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-100";
+
 
   const labelClasses =
     "mb-2 block text-xs font-semibold text-zinc-600";
 
+
   return (
     <>
+
+      {/* =================================
+          ACTION BUTTONS
+          Mobile = fixed bottom navigation
+          Desktop = original button row
+      ================================= */}
+
       <motion.div
         initial={{
           opacity: 0,
@@ -379,74 +454,299 @@ export function TripActions({
         transition={{
           delay: 0.1,
           duration: 0.4,
+          ease: [
+            0.22,
+            1,
+            0.36,
+            1,
+          ],
         }}
-        className="flex flex-wrap gap-2"
+        className="
+          fixed
+          inset-x-0
+          bottom-0
+          z-50
+
+          border-t
+          border-zinc-200
+          bg-white/95
+
+          px-2
+          pt-2
+          pb-[calc(env(safe-area-inset-bottom)+0.55rem)]
+
+          shadow-[0_-8px_25px_rgba(0,0,0,0.06)]
+          backdrop-blur-xl
+
+          md:static
+          md:z-auto
+          md:border-0
+          md:bg-transparent
+          md:p-0
+          md:shadow-none
+          md:backdrop-blur-none
+        "
       >
-        <button
-          type="button"
-          onClick={() =>
-            openModal(
-              "member"
-            )
-          }
-          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98]"
+
+        <div
+          className="
+            mx-auto
+            grid
+            w-full
+            max-w-md
+            grid-cols-4
+            gap-1
+
+            md:mx-0
+            md:flex
+            md:max-w-none
+            md:flex-wrap
+            md:gap-2
+          "
         >
-          <UserPlus
-            size={16}
-          />
 
-          Add Member
-        </button>
+          {/* ADD MEMBER */}
 
-        <button
-          type="button"
-          onClick={() =>
-            openModal(
-              "payment"
-            )
-          }
-          disabled={
-            members.length === 0
-          }
-          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <Banknote
-            size={16}
-          />
+          <button
+            type="button"
+            onClick={() =>
+              openModal(
+                "member"
+              )
+            }
+            className="
+              flex
+              h-14
+              min-w-0
+              flex-col
+              items-center
+              justify-center
+              gap-1
+              rounded-xl
+              px-1
+              text-[10px]
+              font-medium
+              leading-tight
+              text-zinc-600
+              transition
 
-          Record Payment
-        </button>
+              hover:bg-zinc-100
+              active:scale-[0.97]
 
-        <button
-          type="button"
-          onClick={() =>
-            openModal(
-              "expense"
-            )
-          }
-          className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 active:scale-[0.98]"
-        >
-          <Plus
-            size={16}
-          />
+              md:inline-flex
+              md:h-auto
+              md:min-h-10
+              md:flex-row
+              md:gap-2
+              md:rounded-xl
+              md:border
+              md:border-zinc-200
+              md:bg-white
+              md:px-4
+              md:py-2.5
+              md:text-sm
+              md:font-medium
+              md:text-zinc-700
 
-          Add Expense
-        </button>
+              md:hover:border-zinc-300
+              md:hover:bg-zinc-50
+              md:active:scale-[0.98]
+            "
+          >
+            <UserPlus
+              size={18}
+              strokeWidth={1.8}
+              className="shrink-0 md:h-4 md:w-4"
+            />
 
-        <Link
-  href="/report"
-  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98]"
->
-  <FileText
-    size={16}
-  />
+            <span className="text-center">
+              Add Member
+            </span>
+          </button>
 
-  Report
-</Link>
+
+          {/* RECORD PAYMENT */}
+
+          <button
+            type="button"
+            onClick={() =>
+              openModal(
+                "payment"
+              )
+            }
+            disabled={
+              members.length ===
+              0
+            }
+            className="
+              flex
+              h-14
+              min-w-0
+              flex-col
+              items-center
+              justify-center
+              gap-1
+              rounded-xl
+              px-1
+              text-[10px]
+              font-medium
+              leading-tight
+              text-zinc-600
+              transition
+
+              hover:bg-zinc-100
+              active:scale-[0.97]
+
+              disabled:cursor-not-allowed
+              disabled:opacity-40
+
+              md:inline-flex
+              md:h-auto
+              md:min-h-10
+              md:flex-row
+              md:gap-2
+              md:rounded-xl
+              md:border
+              md:border-zinc-200
+              md:bg-white
+              md:px-4
+              md:py-2.5
+              md:text-sm
+              md:font-medium
+              md:text-zinc-700
+
+              md:hover:border-zinc-300
+              md:hover:bg-zinc-50
+              md:active:scale-[0.98]
+            "
+          >
+            <Banknote
+              size={18}
+              strokeWidth={1.8}
+              className="shrink-0 md:h-4 md:w-4"
+            />
+
+            <span className="text-center">
+              Record Payment
+            </span>
+          </button>
+
+
+          {/* ADD EXPENSE */}
+
+          <button
+            type="button"
+            onClick={() =>
+              openModal(
+                "expense"
+              )
+            }
+            className="
+              flex
+              h-14
+              min-w-0
+              flex-col
+              items-center
+              justify-center
+              gap-1
+              rounded-xl
+              bg-zinc-900
+              px-1
+              text-[10px]
+              font-medium
+              leading-tight
+              text-white
+              transition
+
+              hover:bg-zinc-800
+              active:scale-[0.97]
+
+              md:inline-flex
+              md:h-auto
+              md:min-h-10
+              md:flex-row
+              md:gap-2
+              md:px-4
+              md:py-2.5
+              md:text-sm
+              md:font-medium
+              md:active:scale-[0.98]
+            "
+          >
+            <Plus
+              size={18}
+              strokeWidth={1.8}
+              className="shrink-0 md:h-4 md:w-4"
+            />
+
+            <span className="text-center">
+              Add Expense
+            </span>
+          </button>
+
+
+          {/* REPORT */}
+
+          <Link
+            href="/report"
+            className="
+              flex
+              h-14
+              min-w-0
+              flex-col
+              items-center
+              justify-center
+              gap-1
+              rounded-xl
+              px-1
+              text-[10px]
+              font-medium
+              leading-tight
+              text-zinc-600
+              transition
+
+              hover:bg-zinc-100
+              active:scale-[0.97]
+
+              md:inline-flex
+              md:h-auto
+              md:min-h-10
+              md:flex-row
+              md:gap-2
+              md:rounded-xl
+              md:border
+              md:border-zinc-200
+              md:bg-white
+              md:px-4
+              md:py-2.5
+              md:text-sm
+              md:font-medium
+              md:text-zinc-700
+
+              md:hover:border-zinc-300
+              md:hover:bg-zinc-50
+              md:active:scale-[0.98]
+            "
+          >
+            <FileText
+              size={18}
+              strokeWidth={1.8}
+              className="shrink-0 md:h-4 md:w-4"
+            />
+
+            <span className="text-center">
+              Report
+            </span>
+          </Link>
+
+        </div>
 
       </motion.div>
 
-      {/* ADD MEMBER */}
+
+      {/* =================================
+          ADD MEMBER MODAL
+      ================================= */}
 
       <Modal
         open={
@@ -464,6 +764,7 @@ export function TripActions({
             handleAddMember
           }
         >
+
           <label
             className={
               labelClasses
@@ -472,6 +773,7 @@ export function TripActions({
           >
             Name
           </label>
+
 
           <input
             id="member-name"
@@ -485,13 +787,16 @@ export function TripActions({
             required
           />
 
+
           {error && (
             <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
               {error}
             </p>
           )}
 
+
           <div className="mt-6 flex gap-2">
+
             <button
               type="button"
               onClick={
@@ -501,6 +806,7 @@ export function TripActions({
             >
               Cancel
             </button>
+
 
             <button
               type="submit"
@@ -513,11 +819,16 @@ export function TripActions({
                 ? "Adding..."
                 : "Add Member"}
             </button>
+
           </div>
+
         </form>
       </Modal>
 
-      {/* RECORD PAYMENT */}
+
+      {/* =================================
+          RECORD PAYMENT MODAL
+      ================================= */}
 
       <Modal
         open={
@@ -535,7 +846,9 @@ export function TripActions({
             handlePayment
           }
         >
+
           <div>
+
             <label
               className={
                 labelClasses
@@ -544,6 +857,7 @@ export function TripActions({
             >
               Member
             </label>
+
 
             <select
               id="payment-member"
@@ -565,6 +879,7 @@ export function TripActions({
               }
               required
             >
+
               {members.map(
                 (member) => (
                   <option
@@ -581,10 +896,14 @@ export function TripActions({
                   </option>
                 )
               )}
+
             </select>
+
           </div>
 
+
           <div className="mt-4">
+
             <label
               className={
                 labelClasses
@@ -593,6 +912,7 @@ export function TripActions({
             >
               Amount
             </label>
+
 
             <input
               id="payment-amount"
@@ -610,20 +930,27 @@ export function TripActions({
               required
             />
 
+
             {selectedMember && (
               <p className="mt-2 text-xs text-zinc-500">
+
                 Paid{" "}
                 {formatMoney(
                   selectedMember.amountPaid
                 )}
+
                 {" · "}
+
                 Remaining{" "}
                 {formatMoney(
                   remaining
                 )}
+
               </p>
             )}
+
           </div>
+
 
           {error && (
             <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -631,7 +958,9 @@ export function TripActions({
             </p>
           )}
 
+
           <div className="mt-6 flex gap-2">
+
             <button
               type="button"
               onClick={
@@ -641,6 +970,7 @@ export function TripActions({
             >
               Cancel
             </button>
+
 
             <button
               type="submit"
@@ -655,11 +985,16 @@ export function TripActions({
                 ? "Saving..."
                 : "Save Payment"}
             </button>
+
           </div>
+
         </form>
       </Modal>
 
-      {/* ADD EXPENSE */}
+
+      {/* =================================
+          ADD EXPENSE MODAL
+      ================================= */}
 
       <Modal
         open={
@@ -677,7 +1012,9 @@ export function TripActions({
             handleExpense
           }
         >
+
           <div>
+
             <label
               className={
                 labelClasses
@@ -686,6 +1023,7 @@ export function TripActions({
             >
               Expense
             </label>
+
 
             <input
               id="expense-title"
@@ -698,9 +1036,12 @@ export function TripActions({
               autoFocus
               required
             />
+
           </div>
 
+
           <div className="mt-4">
+
             <label
               className={
                 labelClasses
@@ -710,6 +1051,7 @@ export function TripActions({
               Category
             </label>
 
+
             <select
               id="expense-category"
               name="category"
@@ -717,6 +1059,7 @@ export function TripActions({
                 inputClasses
               }
             >
+
               <option value="FOOD">
                 Food
               </option>
@@ -740,11 +1083,16 @@ export function TripActions({
               <option value="OTHER">
                 Other
               </option>
+
             </select>
+
           </div>
 
+
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+
             <div>
+
               <label
                 className={
                   labelClasses
@@ -753,6 +1101,7 @@ export function TripActions({
               >
                 Amount
               </label>
+
 
               <input
                 id="expense-amount"
@@ -765,9 +1114,12 @@ export function TripActions({
                 }
                 required
               />
+
             </div>
 
+
             <div>
+
               <label
                 className={
                   labelClasses
@@ -776,6 +1128,7 @@ export function TripActions({
               >
                 Date
               </label>
+
 
               <input
                 id="expense-date"
@@ -789,8 +1142,11 @@ export function TripActions({
                 }
                 required
               />
+
             </div>
+
           </div>
+
 
           {error && (
             <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -798,7 +1154,9 @@ export function TripActions({
             </p>
           )}
 
+
           <div className="mt-6 flex gap-2">
+
             <button
               type="button"
               onClick={
@@ -808,6 +1166,7 @@ export function TripActions({
             >
               Cancel
             </button>
+
 
             <button
               type="submit"
@@ -825,9 +1184,12 @@ export function TripActions({
                 ? "Adding..."
                 : "Add Expense"}
             </button>
+
           </div>
+
         </form>
       </Modal>
+
     </>
   );
 }

@@ -283,7 +283,7 @@ export default async function Home() {
    */
 
   return (
-    <main className="min-h-screen bg-[#f7f7f8] text-zinc-950">
+    <main className="min-h-screen bg-[#f7f7f8] pb-24 text-zinc-950 md:pb-0">
 
       <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
 
@@ -415,7 +415,9 @@ export default async function Home() {
     />
 
     <TripSettings
-      tripId={trip.id}
+      tripId={
+        trip.id
+      }
       contributionPerPerson={
         trip.contributionPerPerson
       }

@@ -16,55 +16,69 @@ import {
   authClient,
 } from "@/lib/auth-client";
 
+
+type LogoutButtonProps = {
+  name?: string | null;
+};
+
+
 export function LogoutButton({
   name,
-}: {
-  name: string;
-}) {
+}: LogoutButtonProps) {
   const router =
     useRouter();
+
 
   const [
     loading,
     setLoading,
   ] = useState(false);
 
-  async function logout() {
-    setLoading(true);
 
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push(
-            "/login"
-          );
+  async function handleLogout() {
+    try {
+      setLoading(true);
 
-          router.refresh();
-        },
-      },
-    });
+      await authClient.signOut();
 
-    setLoading(false);
+      router.push("/login");
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
   }
 
-  return (
-    <div className="flex items-center gap-2">
 
-      <span className="hidden text-sm text-zinc-500 sm:block">
-        {name}
-      </span>
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+
+      {/* LOGGED-IN USER NAME */}
+
+      {name && (
+        <span className="text-sm font-medium text-zinc-600">
+          {name}
+        </span>
+      )}
+
+
+      {/* LOGOUT BUTTON */}
 
       <button
         type="button"
-        onClick={logout}
+        onClick={handleLogout}
         disabled={loading}
-        className="inline-flex h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 active:scale-[0.98] disabled:opacity-50"
+        className="flex h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <LogOut size={15} />
+        <LogOut
+          size={16}
+          strokeWidth={1.8}
+        />
 
-        {loading
-          ? "..."
-          : "Logout"}
+        <span>
+          {loading
+            ? "Logging out..."
+            : "Logout"}
+        </span>
       </button>
 
     </div>
