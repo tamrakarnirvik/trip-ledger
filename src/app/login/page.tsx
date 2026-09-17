@@ -4,6 +4,10 @@ import {
   LoginForm,
 } from "@/components/auth/login-form";
 
+import {
+  Wallet,
+} from "lucide-react";
+
 export default function LoginPage() {
   const signupEnabled =
     process.env.ALLOW_SIGNUP === "true";
@@ -17,16 +21,19 @@ export default function LoginPage() {
 
         <div className="mb-7 text-center">
 
-          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-lg font-semibold text-white">
-            T
-          </div>
+          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-sm">
+  <Wallet
+    size={21}
+    strokeWidth={1.8}
+  />
+</div>
 
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-            TripLedger
+            Trip Ledger
           </p>
 
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
-            Welcome back
+            Welcome
           </h1>
 
           <p className="mt-2 text-sm text-zinc-500">
@@ -68,7 +75,7 @@ export default function LoginPage() {
                   href="/register"
                   className="flex w-full items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.99]"
                 >
-                  Create Treasurer Account
+                  Create Account
                 </Link>
 
               </div>

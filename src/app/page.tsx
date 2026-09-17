@@ -322,7 +322,7 @@ export default async function Home() {
                 <div className="h-2 w-2 rounded-full bg-zinc-900" />
 
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                  TripLedger
+                  Trip Ledger
                 </p>
 
               </div>

@@ -6,6 +6,10 @@ import {
   RegisterForm,
 } from "@/components/auth/register-form";
 
+import {
+  Wallet,
+} from "lucide-react";
+
 export default function RegisterPage() {
   if (
     process.env.ALLOW_SIGNUP !==
@@ -21,9 +25,12 @@ export default function RegisterPage() {
 
         <div className="mb-7 text-center">
 
-          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-lg font-semibold text-white">
-            T
-          </div>
+          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-sm">
+  <Wallet
+    size={21}
+    strokeWidth={1.8}
+  />
+</div>
 
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
             TripLedger
