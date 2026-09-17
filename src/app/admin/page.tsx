@@ -1,8 +1,9 @@
 import {
   ArrowLeft,
+  Banknote,
   ShieldCheck,
-  UserCheck,
   UsersRound,
+  Wallet,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -12,8 +13,16 @@ import {
 } from "next/navigation";
 
 import {
+  AdminUserManager,
+} from "@/components/admin/admin-user-manager";
+
+import {
   AppSidebar,
 } from "@/components/layout/app-sidebar";
+
+import {
+  formatMoney,
+} from "@/lib/format";
 
 import {
   getCurrentSession,
@@ -26,28 +35,7 @@ export const dynamic =
   "force-dynamic";
 
 
-function formatAdminDate(
-  date: Date
-) {
-  return new Intl.DateTimeFormat(
-    "en",
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }
-  ).format(date);
-}
-
-
 export default async function AdminPage() {
-
-  /*
-   * ===============================
-   * AUTHENTICATION
-   * ===============================
-   */
-
   const session =
     await getCurrentSession();
 
@@ -59,10 +47,6 @@ export default async function AdminPage() {
   }
 
 
-  /*
-   * Only Treasurer accounts
-   * can enter /admin.
-   */
   if (
     session.user.role !==
     "TREASURER"
@@ -74,17 +58,13 @@ export default async function AdminPage() {
 
 
   /*
-   * ===============================
-   * LOAD DATA
-   * ===============================
+   * Load users + trip data.
    */
-
   const [
     users,
     trip,
   ] =
     await Promise.all([
-
       prisma.user.findMany({
         select: {
           id: true,
@@ -103,19 +83,25 @@ export default async function AdminPage() {
 
 
       prisma.trip.findFirst({
-        select: {
-          name: true,
+        include: {
+          members: {
+            include: {
+              contributions:
+                true,
+            },
+          },
+
+          expenses:
+            true,
         },
       }),
-
     ]);
 
 
-  /*
-   * ===============================
-   * ADMIN STATISTICS
-   * ===============================
-   */
+  const tripName =
+    trip?.name ??
+    "Trip Ledger";
+
 
   const totalUsers =
     users.length;
@@ -137,16 +123,65 @@ export default async function AdminPage() {
     ).length;
 
 
-  const verifiedCount =
-    users.filter(
-      (user) =>
-        user.emailVerified
-    ).length;
+  const collected =
+    trip?.members.reduce(
+      (
+        tripTotal,
+        member
+      ) =>
+        tripTotal +
+        member.contributions.reduce(
+          (
+            memberTotal,
+            contribution
+          ) =>
+            memberTotal +
+            contribution.amount,
+          0
+        ),
+      0
+    ) ?? 0;
 
 
-  const tripName =
-    trip?.name ??
-    "Trip Ledger";
+  const spent =
+    trip?.expenses.reduce(
+      (
+        total,
+        expense
+      ) =>
+        total +
+        expense.amount,
+      0
+    ) ?? 0;
+
+
+  const available =
+    collected -
+    spent;
+
+
+  const serializedUsers =
+    users.map(
+      (user) => ({
+        id:
+          user.id,
+
+        name:
+          user.name,
+
+        email:
+          user.email,
+
+        role:
+          user.role,
+
+        emailVerified:
+          user.emailVerified,
+
+        createdAt:
+          user.createdAt.toISOString(),
+      })
+    );
 
 
   return (
@@ -158,10 +193,6 @@ export default async function AdminPage() {
       "
     >
 
-      {/* ==========================
-          SIDEBAR
-      ========================== */}
-
       <AppSidebar
         tripName={
           tripName
@@ -169,10 +200,6 @@ export default async function AdminPage() {
         canManage
       />
 
-
-      {/* ==========================
-          PAGE
-      ========================== */}
 
       <div
         className="
@@ -190,9 +217,9 @@ export default async function AdminPage() {
         "
       >
 
-        {/* ==========================
+        {/* =========================
             HEADER
-        ========================== */}
+        ========================= */}
 
         <header
           className="
@@ -213,6 +240,7 @@ export default async function AdminPage() {
                 flex
                 items-center
                 gap-2
+
                 text-xs
                 font-semibold
                 uppercase
@@ -233,6 +261,7 @@ export default async function AdminPage() {
             <h1
               className="
                 mt-2
+
                 text-2xl
                 font-semibold
                 tracking-tight
@@ -252,7 +281,7 @@ export default async function AdminPage() {
                 text-zinc-500
               "
             >
-              Manage TripLedger users and system access.
+              Manage users, access and TripLedger activity.
             </p>
 
           </div>
@@ -267,6 +296,7 @@ export default async function AdminPage() {
               gap-2
 
               rounded-xl
+
               border
               border-zinc-200
 
@@ -284,7 +314,6 @@ export default async function AdminPage() {
               transition
 
               hover:bg-zinc-50
-              hover:text-zinc-950
             "
           >
 
@@ -299,24 +328,25 @@ export default async function AdminPage() {
         </header>
 
 
-        {/* ==========================
-            STAT CARDS
-        ========================== */}
+        {/* =========================
+            OVERVIEW
+        ========================= */}
 
         <section
           className="
             mt-7
+
             grid
             grid-cols-2
             gap-3
 
             sm:gap-4
 
-            xl:grid-cols-4
+            xl:grid-cols-5
           "
         >
 
-          {/* TOTAL USERS */}
+          {/* USERS */}
 
           <div
             className="
@@ -326,8 +356,6 @@ export default async function AdminPage() {
               bg-white
               p-4
               shadow-sm
-
-              sm:p-5
             "
           >
 
@@ -349,7 +377,7 @@ export default async function AdminPage() {
                     text-zinc-500
                   "
                 >
-                  Total Users
+                  Users
                 </p>
 
 
@@ -370,8 +398,8 @@ export default async function AdminPage() {
               <div
                 className="
                   flex
-                  h-10
-                  w-10
+                  h-9
+                  w-9
                   items-center
                   justify-center
 
@@ -383,52 +411,12 @@ export default async function AdminPage() {
               >
 
                 <UsersRound
-                  size={18}
+                  size={17}
                 />
 
               </div>
 
             </div>
-
-          </div>
-
-
-          {/* TREASURERS */}
-
-          <div
-            className="
-              rounded-[22px]
-              border
-              border-zinc-200
-              bg-white
-              p-4
-              shadow-sm
-
-              sm:p-5
-            "
-          >
-
-            <p
-              className="
-                text-xs
-                font-medium
-                text-zinc-500
-              "
-            >
-              Treasurers
-            </p>
-
-
-            <p
-              className="
-                mt-3
-                text-2xl
-                font-semibold
-                tabular-nums
-              "
-            >
-              {treasurerCount}
-            </p>
 
           </div>
 
@@ -443,18 +431,10 @@ export default async function AdminPage() {
               bg-white
               p-4
               shadow-sm
-
-              sm:p-5
             "
           >
 
-            <p
-              className="
-                text-xs
-                font-medium
-                text-zinc-500
-              "
-            >
+            <p className="text-xs font-medium text-zinc-500">
               Friends
             </p>
 
@@ -473,20 +453,128 @@ export default async function AdminPage() {
           </div>
 
 
-          {/* VERIFIED */}
+          {/* TREASURERS */}
 
           <div
             className="
               rounded-[22px]
               border
-              border-zinc-900
-              bg-zinc-950
+              border-zinc-200
+              bg-white
               p-4
+              shadow-sm
+            "
+          >
+
+            <p className="text-xs font-medium text-zinc-500">
+              Treasurers
+            </p>
+
+
+            <p
+              className="
+                mt-3
+                text-2xl
+                font-semibold
+                tabular-nums
+              "
+            >
+              {treasurerCount}
+            </p>
+
+          </div>
+
+
+          {/* COLLECTED */}
+
+          <div
+            className="
+              rounded-[22px]
+              border
+              border-zinc-200
+              bg-white
+              p-4
+              shadow-sm
+            "
+          >
+
+            <div
+              className="
+                flex
+                items-start
+                justify-between
+              "
+            >
+
+              <div>
+
+                <p className="text-xs font-medium text-zinc-500">
+                  Collected
+                </p>
+
+
+                <p
+                  className="
+                    mt-3
+                    text-xl
+                    font-semibold
+                    tabular-nums
+                  "
+                >
+                  {formatMoney(
+                    collected
+                  )}
+                </p>
+
+              </div>
+
+
+              <div
+                className="
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
+
+                  rounded-xl
+
+                  bg-emerald-50
+                  text-emerald-700
+                "
+              >
+
+                <Banknote
+                  size={17}
+                />
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* AVAILABLE */}
+
+          <div
+            className="
+              col-span-2
+
+              rounded-[22px]
+
+              border
+              border-zinc-900
+
+              bg-zinc-950
+
+              p-4
+
               text-white
 
               shadow-[0_10px_30px_rgba(0,0,0,0.08)]
 
-              sm:p-5
+              xl:col-span-1
             "
           >
 
@@ -508,19 +596,34 @@ export default async function AdminPage() {
                     text-zinc-400
                   "
                 >
-                  Verified
+                  Available
                 </p>
 
 
                 <p
                   className="
                     mt-3
-                    text-2xl
+                    text-xl
                     font-semibold
                     tabular-nums
                   "
                 >
-                  {verifiedCount}
+                  {formatMoney(
+                    available
+                  )}
+                </p>
+
+
+                <p
+                  className="
+                    mt-2
+                    text-[10px]
+                    text-zinc-500
+                  "
+                >
+                  {formatMoney(
+                    spent
+                  )} spent
                 </p>
 
               </div>
@@ -529,20 +632,19 @@ export default async function AdminPage() {
               <div
                 className="
                   flex
-                  h-10
-                  w-10
+                  h-9
+                  w-9
                   items-center
                   justify-center
 
                   rounded-xl
 
                   bg-white/10
-                  text-white
                 "
               >
 
-                <UserCheck
-                  size={18}
+                <Wallet
+                  size={17}
                 />
 
               </div>
@@ -554,596 +656,32 @@ export default async function AdminPage() {
         </section>
 
 
-        {/* ==========================
-            USERS TABLE
-        ========================== */}
+        {/* =========================
+            USER MANAGEMENT
+        ========================= */}
 
-        <section
+        <AdminUserManager
+          users={
+            serializedUsers
+          }
+          currentUserId={
+            session.user.id
+          }
+        />
+
+
+        <footer
           className="
-            mt-5
-            rounded-[24px]
-            border
-            border-zinc-200
-            bg-white
-            shadow-sm
+            mt-8
+            pb-5
+
+            text-center
+            text-xs
+            text-zinc-400
           "
         >
-
-          {/* HEADER */}
-
-          <div
-            className="
-              flex
-              items-center
-              justify-between
-              gap-4
-
-              border-b
-              border-zinc-100
-
-              px-5
-              py-4
-
-              sm:px-6
-            "
-          >
-
-            <div>
-
-              <h2
-                className="
-                  text-base
-                  font-semibold
-                  text-zinc-950
-                "
-              >
-                Registered Users
-              </h2>
-
-
-              <p
-                className="
-                  mt-1
-                  text-xs
-                  text-zinc-500
-                "
-              >
-                Accounts registered with TripLedger.
-              </p>
-
-            </div>
-
-
-            <span
-              className="
-                rounded-full
-                bg-zinc-100
-                px-2.5
-                py-1.5
-
-                text-[11px]
-                font-medium
-                text-zinc-600
-              "
-            >
-              {users.length} users
-            </span>
-
-          </div>
-
-
-          {/* DESKTOP TABLE */}
-
-          <div
-            className="
-              hidden
-              overflow-x-auto
-
-              md:block
-            "
-          >
-
-            <table
-              className="
-                w-full
-                border-collapse
-                text-left
-              "
-            >
-
-              <thead>
-
-                <tr
-                  className="
-                    border-b
-                    border-zinc-100
-
-                    text-[11px]
-                    font-medium
-                    uppercase
-                    tracking-wide
-                    text-zinc-400
-                  "
-                >
-
-                  <th
-                    className="
-                      px-6
-                      py-3
-                    "
-                  >
-                    User
-                  </th>
-
-
-                  <th
-                    className="
-                      px-4
-                      py-3
-                    "
-                  >
-                    Role
-                  </th>
-
-
-                  <th
-                    className="
-                      px-4
-                      py-3
-                    "
-                  >
-                    Verification
-                  </th>
-
-
-                  <th
-                    className="
-                      px-4
-                      py-3
-                    "
-                  >
-                    Joined
-                  </th>
-
-                </tr>
-
-              </thead>
-
-
-              <tbody>
-
-                {users.map(
-                  (user) => {
-
-                    const initial =
-                      user.name
-                        ?.trim()
-                        .charAt(0)
-                        .toUpperCase() ||
-                      user.email
-                        .charAt(0)
-                        .toUpperCase();
-
-
-                    const isCurrentUser =
-                      user.id ===
-                      session.user.id;
-
-
-                    return (
-
-                      <tr
-                        key={
-                          user.id
-                        }
-                        className="
-                          border-b
-                          border-zinc-100
-
-                          last:border-b-0
-
-                          transition
-
-                          hover:bg-zinc-50/60
-                        "
-                      >
-
-                        {/* USER */}
-
-                        <td
-                          className="
-                            px-6
-                            py-4
-                          "
-                        >
-
-                          <div
-                            className="
-                              flex
-                              items-center
-                              gap-3
-                            "
-                          >
-
-                            <div
-                              className="
-                                flex
-                                h-9
-                                w-9
-                                shrink-0
-                                items-center
-                                justify-center
-
-                                rounded-xl
-
-                                bg-zinc-100
-
-                                text-xs
-                                font-semibold
-                                text-zinc-700
-                              "
-                            >
-                              {initial}
-                            </div>
-
-
-                            <div
-                              className="
-                                min-w-0
-                              "
-                            >
-
-                              <div
-                                className="
-                                  flex
-                                  items-center
-                                  gap-2
-                                "
-                              >
-
-                                <p
-                                  className="
-                                    truncate
-                                    text-sm
-                                    font-medium
-                                    text-zinc-900
-                                  "
-                                >
-                                  {user.name ||
-                                    "Unnamed User"}
-                                </p>
-
-
-                                {isCurrentUser && (
-
-                                  <span
-                                    className="
-                                      rounded-full
-                                      bg-zinc-100
-                                      px-2
-                                      py-0.5
-
-                                      text-[10px]
-                                      font-medium
-                                      text-zinc-500
-                                    "
-                                  >
-                                    You
-                                  </span>
-
-                                )}
-
-                              </div>
-
-
-                              <p
-                                className="
-                                  mt-0.5
-                                  truncate
-                                  text-xs
-                                  text-zinc-500
-                                "
-                              >
-                                {user.email}
-                              </p>
-
-                            </div>
-
-                          </div>
-
-                        </td>
-
-
-                        {/* ROLE */}
-
-                        <td
-                          className="
-                            px-4
-                            py-4
-                          "
-                        >
-
-                          <span
-                            className={`
-                              inline-flex
-                              rounded-full
-                              px-2.5
-                              py-1
-
-                              text-[11px]
-                              font-medium
-
-                              ${
-                                user.role ===
-                                "TREASURER"
-                                  ? "bg-zinc-950 text-white"
-                                  : "bg-zinc-100 text-zinc-600"
-                              }
-                            `}
-                          >
-                            {
-                              user.role ===
-                              "TREASURER"
-                                ? "Treasurer"
-                                : "Friend"
-                            }
-                          </span>
-
-                        </td>
-
-
-                        {/* VERIFICATION */}
-
-                        <td
-                          className="
-                            px-4
-                            py-4
-                          "
-                        >
-
-                          <span
-                            className={`
-                              inline-flex
-                              rounded-full
-                              px-2.5
-                              py-1
-
-                              text-[11px]
-                              font-medium
-
-                              ${
-                                user.emailVerified
-                                  ? "bg-emerald-50 text-emerald-700"
-                                  : "bg-amber-50 text-amber-700"
-                              }
-                            `}
-                          >
-
-                            {user.emailVerified
-                              ? "Verified"
-                              : "Pending"}
-
-                          </span>
-
-                        </td>
-
-
-                        {/* DATE */}
-
-                        <td
-                          className="
-                            whitespace-nowrap
-                            px-4
-                            py-4
-
-                            text-xs
-                            text-zinc-500
-                          "
-                        >
-                          {formatAdminDate(
-                            user.createdAt
-                          )}
-                        </td>
-
-                      </tr>
-
-                    );
-
-                  }
-                )}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-
-          {/* MOBILE USER CARDS */}
-
-          <div
-            className="
-              divide-y
-              divide-zinc-100
-
-              md:hidden
-            "
-          >
-
-            {users.map(
-              (user) => {
-
-                const initial =
-                  user.name
-                    ?.trim()
-                    .charAt(0)
-                    .toUpperCase() ||
-                  user.email
-                    .charAt(0)
-                    .toUpperCase();
-
-
-                return (
-
-                  <div
-                    key={
-                      user.id
-                    }
-                    className="
-                      px-5
-                      py-4
-                    "
-                  >
-
-                    <div
-                      className="
-                        flex
-                        items-start
-                        gap-3
-                      "
-                    >
-
-                      <div
-                        className="
-                          flex
-                          h-9
-                          w-9
-                          shrink-0
-                          items-center
-                          justify-center
-
-                          rounded-xl
-
-                          bg-zinc-100
-
-                          text-xs
-                          font-semibold
-                          text-zinc-700
-                        "
-                      >
-                        {initial}
-                      </div>
-
-
-                      <div
-                        className="
-                          min-w-0
-                          flex-1
-                        "
-                      >
-
-                        <p
-                          className="
-                            truncate
-                            text-sm
-                            font-medium
-                            text-zinc-900
-                          "
-                        >
-                          {user.name ||
-                            "Unnamed User"}
-                        </p>
-
-
-                        <p
-                          className="
-                            mt-0.5
-                            truncate
-                            text-xs
-                            text-zinc-500
-                          "
-                        >
-                          {user.email}
-                        </p>
-
-
-                        <div
-                          className="
-                            mt-3
-                            flex
-                            flex-wrap
-                            items-center
-                            gap-2
-                          "
-                        >
-
-                          <span
-                            className={`
-                              rounded-full
-                              px-2.5
-                              py-1
-
-                              text-[10px]
-                              font-medium
-
-                              ${
-                                user.role ===
-                                "TREASURER"
-                                  ? "bg-zinc-950 text-white"
-                                  : "bg-zinc-100 text-zinc-600"
-                              }
-                            `}
-                          >
-
-                            {user.role ===
-                            "TREASURER"
-                              ? "Treasurer"
-                              : "Friend"}
-
-                          </span>
-
-
-                          <span
-                            className={`
-                              rounded-full
-                              px-2.5
-                              py-1
-
-                              text-[10px]
-                              font-medium
-
-                              ${
-                                user.emailVerified
-                                  ? "bg-emerald-50 text-emerald-700"
-                                  : "bg-amber-50 text-amber-700"
-                              }
-                            `}
-                          >
-
-                            {user.emailVerified
-                              ? "Verified"
-                              : "Pending"}
-
-                          </span>
-
-
-                          <span
-                            className="
-                              text-[10px]
-                              text-zinc-400
-                            "
-                          >
-                            {formatAdminDate(
-                              user.createdAt
-                            )}
-                          </span>
-
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                );
-
-              }
-            )}
-
-          </div>
-
-        </section>
+          TripLedger Admin
+        </footer>
 
       </div>
 
