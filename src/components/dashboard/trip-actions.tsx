@@ -380,7 +380,7 @@ export function TripActions({
           delay: 0.1,
           duration: 0.4,
         }}
-        className="mb-4 flex flex-wrap gap-2"
+        className="flex flex-wrap gap-2"
       >
         <button
           type="button"

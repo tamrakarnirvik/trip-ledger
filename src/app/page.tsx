@@ -51,6 +51,10 @@ import {
   auth,
 } from "@/lib/auth";
 
+import {
+  TripSettings,
+} from "@/components/dashboard/trip-settings";
+
 import prisma from "@/lib/prisma";
 
 import type {
@@ -397,16 +401,29 @@ export default async function Home() {
 
         {/* ACTION BUTTONS */}
 
-        {isTreasurer ? (
-  <TripActions
-    tripId={trip.id}
-    members={members}
-    contributionPerPerson={
-      trip.contributionPerPerson
-    }
-  />
+        {/* TREASURER ACTIONS */}
+
+{isTreasurer ? (
+  <div className="mb-6 flex flex-wrap items-start gap-2">
+
+    <TripActions
+      tripId={trip.id}
+      members={members}
+      contributionPerPerson={
+        trip.contributionPerPerson
+      }
+    />
+
+    <TripSettings
+      tripId={trip.id}
+      contributionPerPerson={
+        trip.contributionPerPerson
+      }
+    />
+
+  </div>
 ) : (
-  <div className="mb-4 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+  <div className="mb-6 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
 
     <p className="text-sm font-medium text-zinc-700">
       View-only access
