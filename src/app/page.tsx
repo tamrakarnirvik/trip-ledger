@@ -340,13 +340,25 @@ const userInitial =
     {/* LEFT SIDE */}
 
     <div className="pt-1">
-      <div className="mb-1.5 flex items-center gap-2">
-        <div className="h-1.5 w-1.5 rounded-full bg-zinc-950" />
+      <div className="mb-2 flex items-center gap-2.5">
 
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
-          Trip Ledger
-        </p>
-      </div>
+  {/* TRIP LEDGER LOGO */}
+
+  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-sm">
+    <Wallet
+      size={17}
+      strokeWidth={1.8}
+    />
+  </div>
+
+
+  {/* BRAND NAME */}
+
+  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
+    Trip Ledger
+  </p>
+
+</div>
 
       <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl">
         {trip.name}

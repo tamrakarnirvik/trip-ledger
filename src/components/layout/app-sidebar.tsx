@@ -7,11 +7,14 @@ import {
   ReceiptText,
   Settings2,
   UsersRound,
+  Wallet,
 } from "lucide-react";
+
 
 type AppSidebarProps = {
   tripName: string;
 };
+
 
 export function AppSidebar({
   tripName,
@@ -28,12 +31,14 @@ export function AppSidebar({
         lg:flex
       "
     >
+
       {/* LOGO */}
 
       <div className="flex items-center gap-3 px-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-950 text-white">
-          <Mountain
-            size={18}
+
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-sm">
+          <Wallet
+            size={17}
             strokeWidth={1.8}
           />
         </div>
@@ -41,6 +46,7 @@ export function AppSidebar({
         <span className="text-lg font-semibold tracking-tight text-zinc-950">
           Trip Ledger
         </span>
+
       </div>
 
 
@@ -59,7 +65,9 @@ export function AppSidebar({
             text-zinc-950
           "
         >
-          <LayoutDashboard size={18} />
+          <LayoutDashboard
+            size={18}
+          />
 
           Dashboard
         </Link>
@@ -78,7 +86,9 @@ export function AppSidebar({
             hover:text-zinc-950
           "
         >
-          <UsersRound size={18} />
+          <UsersRound
+            size={18}
+          />
 
           Members
         </Link>
@@ -97,7 +107,9 @@ export function AppSidebar({
             hover:text-zinc-950
           "
         >
-          <ReceiptText size={18} />
+          <ReceiptText
+            size={18}
+          />
 
           Expenses
         </Link>
@@ -116,7 +128,9 @@ export function AppSidebar({
             hover:text-zinc-950
           "
         >
-          <FileText size={18} />
+          <FileText
+            size={18}
+          />
 
           Reports
         </Link>
@@ -135,7 +149,9 @@ export function AppSidebar({
             hover:text-zinc-950
           "
         >
-          <Settings2 size={18} />
+          <Settings2
+            size={18}
+          />
 
           Trip Settings
         </Link>
@@ -150,11 +166,13 @@ export function AppSidebar({
         <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50">
 
           <div className="flex h-20 items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
+
             <Mountain
               size={32}
               strokeWidth={1.4}
               className="text-zinc-500"
             />
+
           </div>
 
           <div className="p-4">
@@ -176,6 +194,7 @@ export function AppSidebar({
         </div>
 
       </div>
+
     </aside>
   );
 }
