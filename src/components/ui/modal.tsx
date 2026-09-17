@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  useEffect,
+} from "react";
+
+import {
   AnimatePresence,
   motion,
 } from "motion/react";
@@ -9,23 +13,75 @@ import {
   X,
 } from "lucide-react";
 
+
 type ModalProps = {
   open: boolean;
+  onClose: () => void;
   title: string;
   description?: string;
-  onClose: () => void;
   children: React.ReactNode;
 };
 
+
 export function Modal({
   open,
+  onClose,
   title,
   description,
-  onClose,
   children,
 }: ModalProps) {
+
+  /*
+   * Stop the page behind the modal
+   * from scrolling.
+   */
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow =
+      "hidden";
+
+
+    function handleKeyDown(
+      event: KeyboardEvent
+    ) {
+      if (
+        event.key === "Escape"
+      ) {
+        onClose();
+      }
+    }
+
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+
+    return () => {
+      document.body.style.overflow =
+        previousOverflow;
+
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [
+    open,
+    onClose,
+  ]);
+
+
   return (
     <AnimatePresence>
+
       {open && (
         <motion.div
           initial={{
@@ -40,29 +96,51 @@ export function Modal({
           transition={{
             duration: 0.18,
           }}
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-3 backdrop-blur-[2px] sm:items-center sm:p-6"
-          onMouseDown={
-            onClose
-          }
+          className="
+            fixed
+            inset-0
+            z-[100]
+            flex
+            min-h-[100dvh]
+            items-center
+            justify-center
+            overflow-hidden
+            bg-black/35
+            p-4
+            backdrop-blur-[2px]
+
+            sm:p-6
+          "
+          onMouseDown={(
+            event
+          ) => {
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
+              onClose();
+            }
+          }}
         >
+
           <motion.div
             initial={{
               opacity: 0,
-              y: 24,
-              scale: 0.98,
+              scale: 0.97,
+              y: 12,
             }}
             animate={{
               opacity: 1,
-              y: 0,
               scale: 1,
+              y: 0,
             }}
             exit={{
               opacity: 0,
-              y: 16,
-              scale: 0.98,
+              scale: 0.97,
+              y: 12,
             }}
             transition={{
-              duration: 0.24,
+              duration: 0.22,
               ease: [
                 0.22,
                 1,
@@ -72,49 +150,97 @@ export function Modal({
             }}
             role="dialog"
             aria-modal="true"
-            aria-label={title}
-            className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-5 shadow-2xl shadow-black/10 sm:p-6"
-            onMouseDown={(
-              event
-            ) =>
-              event.stopPropagation()
-            }
+            aria-labelledby="modal-title"
+            className="
+              flex
+              max-h-[calc(100dvh-2rem)]
+              w-full
+              max-w-md
+              flex-col
+              overflow-hidden
+              rounded-[24px]
+              border
+              border-zinc-200
+              bg-white
+              shadow-2xl
+
+              sm:max-h-[calc(100dvh-3rem)]
+            "
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold tracking-tight text-zinc-950">
+
+            {/* HEADER */}
+
+            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-zinc-100 px-5 py-4">
+
+              <div className="min-w-0">
+
+                <h2
+                  id="modal-title"
+                  className="text-base font-semibold text-zinc-950"
+                >
                   {title}
                 </h2>
 
+
                 {description && (
-                  <p className="mt-1 text-sm leading-5 text-zinc-500">
-                    {
-                      description
-                    }
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">
+                    {description}
                   </p>
                 )}
+
               </div>
+
 
               <button
                 type="button"
                 onClick={
                   onClose
                 }
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900"
-                aria-label="Close"
+                className="
+                  flex
+                  h-9
+                  w-9
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  text-zinc-400
+                  transition
+                  hover:bg-zinc-100
+                  hover:text-zinc-800
+                "
+                aria-label="Close modal"
               >
                 <X
                   size={17}
+                  strokeWidth={1.8}
                 />
               </button>
+
             </div>
 
-            <div className="mt-6">
+
+            {/* CONTENT */}
+
+            <div
+              className="
+                min-h-0
+                flex-1
+                overflow-y-auto
+                px-5
+                py-5
+
+                overscroll-contain
+              "
+            >
               {children}
             </div>
+
           </motion.div>
+
         </motion.div>
       )}
+
     </AnimatePresence>
   );
 }
